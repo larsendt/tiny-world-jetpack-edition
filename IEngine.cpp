@@ -20,8 +20,12 @@ IEngine::IEngine(int argc, char** argv)
 	
 	sh = new Shader((char*)"shaders/basic.vert", (char*)"shaders/basic.frag");
 	
-	dotpos = dotspeed = vec2(0,0);
-	dotspeed.y = .2;
+	planet.pos = vec2(-20,10);
+	planet.rad = 5.0;
+	planet.mass = 0.0;
+	planet2.pos = vec2(20,-10);
+	planet2.rad = 10.0;
+	planet.mass = 5.0;
 	bones = boneLoadStructure("bones/zombie.bones");
 	boneLoadAnimation(bones, "bones/zombie.anim");
 
@@ -62,18 +66,21 @@ void IEngine::checkKeys(){
 	bool space = input.IsKeyDown(sf::Key::Space);
 	
 	if (d){
-		dotspeed.x += cos(radians(rotation)) * .005;
-		dotspeed.y -= sin(radians(rotation)) * .005;
+		dude.rot -= 2;
 	}
 	
 	if (a){
-		dotspeed.x -= sin(radians(rotation)) * .005;
-		dotspeed.y += cos(radians(rotation)) * .005;
+		dude.rot += 2;
 	}
 	
 	if (space){	
-		dotspeed.x += cos(radians(rotation)) * .01;
-		dotspeed.y += sin(radians(rotation)) * .01;
+		dude.vel.x += cos(radians(dude.rot)) * .001;
+		dude.vel.y += sin(radians(dude.rot)) * .001;
+	}
+	
+	if (space && contact){	
+		dude.vel.x += cos(radians(dude.rot)) * .01;
+		dude.vel.y += sin(radians(dude.rot)) * .01;
 	}
 	
 }
@@ -138,62 +145,51 @@ void IEngine::drawScene()
 {
 	//p.startDraw();
 	
-	vec2 gravVector = vec2(0,0) - dotpos;
-	
-	if ((gravVector.length() < .1)){
-		gravVector = vec2(0,0);
-	}
-	
-	else{
-		gravVector = gravVector.normalize() * .005;
-	}
-	
-	rotation = 180 + degrees(atan2(gravVector.y,gravVector.x));
-	
-	dotspeed = dotspeed + gravVector;
-	
-	dotpos = dotpos + dotspeed;//*multiplier;
-	
-	
-	
 	if (m_wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
 	//glTranslatef(-dotpos.x,-dotpos.y,0);
 	glUseProgram(0);
 	
-	glDisable(GL_TEXTURE_2D);
-	glColor3f(1.0,1.0,1.0);
 	glPushMatrix();
-	glTranslatef(dotpos.x, dotpos.y, 0);
 	
-	glBegin(GL_LINES);
-	glVertex2f(0,0);
-	glVertex2f(gravVector.x*300, gravVector.y*300);
+	glRotatef(-dude.rot + 90, 0, 0, 1);
+	glTranslatef(-dude.pos.x, -dude.pos.y, 0);
+	glDisable(GL_TEXTURE_2D);
+	
+	glPushMatrix();
+	glTranslatef(planet.pos.x, planet.pos.y,0);
+	glBegin(GL_TRIANGLES);
+	
+		for (int i = 0; i < 73; i++){
+			glColor3f(.5,.5,1.0);
+			glVertex2f(sin(i/2.5)*planet.rad, cos(i/2.5)*planet.rad);
+			glVertex2f(0,0);
+			glVertex2f(sin((i+1)/2.5)*planet.rad, cos((i+1)/2.5)*planet.rad);
+		}
+	
 	glEnd();
 	glPopMatrix();
 	glPushMatrix();
-	
+	glTranslatef(planet2.pos.x, planet2.pos.y,0);
 	glBegin(GL_TRIANGLES);
 	
-		for (int i = 0; i < 157; i++){
-			glVertex2f(sin(i/5.0)*5, cos(i/5.0)*5);
+		for (int i = 0; i < 73; i++){
+			glColor3f(.5,.5,i/73.0);
+			glVertex2f(sin(i/2.5)*planet2.rad, cos(i/2.5)*planet2.rad);
 			glVertex2f(0,0);
-			glVertex2f(sin((i+1)/5.0)*5, cos((i+1)/5.0)*5);
+			glVertex2f(sin((i+1)/2.5)*planet2.rad, cos((i+1)/2.5)*planet2.rad);
 		}
 	
 	glEnd();
 	
-	glTranslatef(dotpos.x, dotpos.y, 0);
-	glRotatef(rotation, 0,0,1);
+	glPopMatrix();
+	
+	glTranslatef(dude.pos.x, dude.pos.y, 0);
+	glRotatef(dude.rot, 0,0,1);
 	glColor3f(1.0,0.0,0.0);
-	//glBegin(GL_LINES);
-		//glVertex2f(0,0);
-	//	glVertex2f(10.0,0);
-	
-//	glEnd();
-	
-	
+
+	// rakkit shep
 	
 	glBegin(GL_TRIANGLES);
 		glVertex2f(-1,-1);
@@ -205,10 +201,8 @@ void IEngine::drawScene()
 	//drawBoneTree(bones);
 	glPopMatrix();
 	
-	glEnable(GL_TEXTURE_2D);
-	float sx = 2.0 / m_window->GetWidth();
-	float sy = 2.0 / m_window->GetHeight();
-
+	glPopMatrix();	
+		
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	
 	//p.draw();
@@ -223,6 +217,7 @@ void IEngine::update()
 	
 	float multiplier = 1.0;
 	
+	if (contact > 0) contact --;
 	
 	while(diff < m_updateRate)
 	{
@@ -239,6 +234,57 @@ void IEngine::update()
 	fps = 1/diff;
 	
 
+	vec2 gravVector = planet.pos - dude.pos;
+	
+	vec2 gravNormal = (gravVector * -1).normalize();
+	
+	vec2 diffVector = planet.pos - (dude.pos + dude.vel);
+	
+	float dist = gravVector.length();
+	
+	//Check intersection
+	if ((diffVector.length() < (dude.rad + planet.rad))){
+		// Reflect on normal
+	
+		dude.vel = dude.vel - (gravNormal * (dot(dude.vel, gravNormal)) * 1.0);
+		if (contact > 0) dude.pos = planet.pos + gravNormal * planet.rad + gravNormal * dude.rad;
+		contact = 2;
+	}
+
+	gravVector = gravVector.normalize() * (1/(dist * dist)) * planet.mass;
+		
+	dude.addForce(gravVector);
+	
+	gravVector = planet2.pos - dude.pos;
+	
+	gravNormal = (gravVector * -1).normalize();
+	
+	diffVector = planet.pos - (dude.pos + dude.vel);
+	
+	dist = gravVector.length();
+	
+	//Check intersection
+	if ((gravVector.length() < (dude.rad + planet2.rad))){
+		// Reflect on normal
+	
+		dude.vel = dude.vel - (gravNormal * (dot(dude.vel, gravNormal)) * 1.0);
+		if (contact > 0)dude.pos = planet2.pos + gravNormal * planet2.rad + gravNormal * dude.rad;
+		contact = 2;
+	}
+	
+	gravVector = gravVector.normalize() * (1/(dist * dist)) * planet.mass;
+		
+	dude.addForce(gravVector);
+	
+	if (contact > 0){
+		if (dude.vel.length() > .01){
+			dude.vel = dude.vel.normalize() * (dude.vel.length() - .01);
+		}
+		else dude.vel = vec2(0,0);
+	}
+	
+	dude.update();//*multiplier;
+	
 	//float mult = (fabs(dotspeed.x) > 2.0 ? 2.0: fabs(dotspeed.x));
 	//boneAnimate(bones, frames, mult);
 	

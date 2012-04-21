@@ -13,7 +13,7 @@
 #include "Vec3.h"
 #include "Collision.h"
 #include "Bone.h"
-
+#include "PBody.h"
 
 
 #ifndef IEngine_H
@@ -22,6 +22,12 @@
 #define PI 3.1415
 #define radians(i) (i/180.0 * PI)
 #define degrees(i) (i/PI * 180.0)
+
+struct Planet{
+	vec2 pos;
+	float rad;
+	float mass;
+};
 
 class IEngine
 {
@@ -51,10 +57,10 @@ class IEngine
 		PostProcess p;
 		Shader * sh;
 		Bone * bones;
-		
-		vec2 dotpos;
-		vec2 dotspeed;
-		float rotation;
+
+		Planet planet;
+		Planet planet2;
+		PBody dude;		
 		
 		float dist;
 };
