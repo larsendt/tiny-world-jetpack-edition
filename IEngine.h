@@ -20,8 +20,8 @@
 #define IEngine_H
 
 #define PI 3.1415
-#define mradians(i) (i/180.0 * PI)
-#define mdegrees(i) (i/PI * 180.0)
+#define radians(i) (i/180.0 * PI)
+#define degrees(i) (i/PI * 180.0)
 
 class IEngine
 {
@@ -52,9 +52,10 @@ class IEngine
 		Shader * sh;
 		Bone * bones;
 		
-		PLANE floor;
 		vec2 dotpos;
 		vec2 dotspeed;
+		float rotation;
+		
 		float dist;
 };
 

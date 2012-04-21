@@ -21,7 +21,7 @@ IEngine::IEngine(int argc, char** argv)
 	sh = new Shader((char*)"shaders/basic.vert", (char*)"shaders/basic.frag");
 	
 	dotpos = dotspeed = vec2(0,0);
-	dotspeed.x = .2;
+	dotspeed.y = .2;
 	bones = boneLoadStructure("bones/zombie.bones");
 	boneLoadAnimation(bones, "bones/zombie.anim");
 
@@ -61,18 +61,19 @@ void IEngine::checkKeys(){
 
 	bool space = input.IsKeyDown(sf::Key::Space);
 	
-	if (d && contact){
-		dotspeed.x +=.05;
-		moving = true;
+	if (d){
+		dotspeed.x += cos(radians(rotation)) * .005;
+		dotspeed.y -= sin(radians(rotation)) * .005;
 	}
 	
-	if (a && contact){
-		dotspeed.x -=.05;
-		moving = true;
+	if (a){
+		dotspeed.x -= sin(radians(rotation)) * .005;
+		dotspeed.y += cos(radians(rotation)) * .005;
 	}
 	
-	if (space){
-		dotspeed.y += .2;
+	if (space){	
+		dotspeed.x += cos(radians(rotation)) * .01;
+		dotspeed.y += sin(radians(rotation)) * .01;
 	}
 	
 }
@@ -137,6 +138,24 @@ void IEngine::drawScene()
 {
 	//p.startDraw();
 	
+	vec2 gravVector = vec2(0,0) - dotpos;
+	
+	if ((gravVector.length() < .1)){
+		gravVector = vec2(0,0);
+	}
+	
+	else{
+		gravVector = gravVector.normalize() * .005;
+	}
+	
+	rotation = 180 + degrees(atan2(gravVector.y,gravVector.x));
+	
+	dotspeed = dotspeed + gravVector;
+	
+	dotpos = dotpos + dotspeed;//*multiplier;
+	
+	
+	
 	if (m_wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
@@ -144,21 +163,46 @@ void IEngine::drawScene()
 	glUseProgram(0);
 	
 	glDisable(GL_TEXTURE_2D);
-
+	glColor3f(1.0,1.0,1.0);
+	glPushMatrix();
+	glTranslatef(dotpos.x, dotpos.y, 0);
 	
 	glBegin(GL_LINES);
-	glColor3f(1.0,1.0,1.0);
-	glVertex3f(floor.a.x, floor.a.y, 0);
-	glColor3f(.1,.1,1.0);
-	glVertex3f(floor.b.x, floor.b.y, 0);
+	glVertex2f(0,0);
+	glVertex2f(gravVector.x*300, gravVector.y*300);
+	glEnd();
+	glPopMatrix();
+	glPushMatrix();
+	
+	glBegin(GL_TRIANGLES);
+	
+		for (int i = 0; i < 157; i++){
+			glVertex2f(sin(i/5.0)*5, cos(i/5.0)*5);
+			glVertex2f(0,0);
+			glVertex2f(sin((i+1)/5.0)*5, cos((i+1)/5.0)*5);
+		}
 	
 	glEnd();
 	
-	glPushMatrix();
 	glTranslatef(dotpos.x, dotpos.y, 0);
-	float dir = (dotspeed.x<0?-1:1);
-	glScalef(dir, 1, dir);
-	drawBoneTree(bones);
+	glRotatef(rotation, 0,0,1);
+	glColor3f(1.0,0.0,0.0);
+	//glBegin(GL_LINES);
+		//glVertex2f(0,0);
+	//	glVertex2f(10.0,0);
+	
+//	glEnd();
+	
+	
+	
+	glBegin(GL_TRIANGLES);
+		glVertex2f(-1,-1);
+		glVertex2f(-1,1);
+		glVertex2f(2,0);
+		
+	glEnd();
+	
+	//drawBoneTree(bones);
 	glPopMatrix();
 	
 	glEnable(GL_TEXTURE_2D);
@@ -187,11 +231,6 @@ void IEngine::update()
     	continue;
     }
     time = newTime;
-    if (abs(dotpos.x) > 60.0){
-    	dotpos.x = 60.0 * (dotpos.x < 0? 1 : -1);
-    }
-
-    
 
    	if(diff > m_updateRate)
 	{
@@ -199,30 +238,9 @@ void IEngine::update()
 	}
 	fps = 1/diff;
 	
-	dotspeed.y -=.01;
-	
-	if (contact > 0) {
-		
-		float len = dotspeed.length();
-		if (!moving){
-			if (len >= 0.05){
-				dotspeed =  dotspeed.normalize() * (len-0.05);
-			}
-			else dotspeed = vec2(0,0);
-		}
-		
-		if (len > 2.0){
-			len = 2.0;
-			dotspeed = dotspeed.normalize() * len;
-		}
-		
-		if (len > 0){
-			float mult = (fabs(dotspeed.x) > 2.0 ? 2.0: fabs(dotspeed.x));
-			boneAnimate(bones, frames, mult);
-		}
-	}
-	
-	dotpos = dotpos + dotspeed;//*multiplier;
+
+	//float mult = (fabs(dotspeed.x) > 2.0 ? 2.0: fabs(dotspeed.x));
+	//boneAnimate(bones, frames, mult);
 	
 	frames++;
 	
@@ -238,7 +256,7 @@ void IEngine::resize(int width, int height)
 	glViewport(0, 0, width, height);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(-50.0,50.0,-50.0,50.0,-50.0,50.0);
+	glOrtho(-50.0 * m_width,50.0 * m_width,-50.0,50.0,-50.0,50.0);
 	//gluPerspective(45.0,m_width,1,1000);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
