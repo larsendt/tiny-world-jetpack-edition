@@ -44,7 +44,8 @@ IEngine::IEngine(int argc, char** argv)
 	tex = loadImage("textures/dude.png");
 	
 	sounds.Load_Music();
-	sounds.Play_Music();
+		//sounds.Play_Music();
+	sounds.Load_Jetpack();
 	
 	dude.setPBody(vec2(-20,-20), vec2(0,0), 0, 4.0, .001);
 	dude.setDBody(vec2(-2,4), vec2(2,-4), tex);
@@ -106,6 +107,8 @@ void IEngine::showCursor(){
 
 void IEngine::checkKeys(){
 
+	bool jetpack;
+	
 	// This function deals with constant keypresses.
 	
 	const sf::Input& input = m_window->GetInput();
@@ -134,7 +137,14 @@ void IEngine::checkKeys(){
 	
 	if (space){	
 		dude.physics_object.addForce(vec2(cos(radians(dude.physics_object.rot)) * 5, sin(radians(dude.physics_object.rot)) * 5));
+		jetpack = true;
 	}
+	
+	if (!space){
+		jetpack = false;
+	}
+	
+	sounds.Play_Jetpack(jetpack);
 }
 
 int IEngine::begin()
