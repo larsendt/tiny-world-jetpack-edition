@@ -30,7 +30,7 @@ IEngine::IEngine(int argc, char** argv)
 	sh = new Shader((char*)"shaders/basic.vert", (char*)"shaders/basic.frag");
 	unsigned int tex = loadImage("textures/shadedplanet.png");
 	
-	Planet* planet = new Planet(vec2(20,20), 20.0, 1000.0, tex);
+	Planet* planet = new Planet(vec2(20,20), 20.0, 1000.0, tex, true);
 	m_planets.push_back(planet);
 	planet = new Planet(vec2(-30,-30), 10, 500.0, tex);
 	m_planets.push_back(planet);
@@ -52,7 +52,9 @@ IEngine::IEngine(int argc, char** argv)
 	contact = 0;
 	moving = false;
 	
+	victory = false;
 	
+	m_splash = new SplashScreen(m_width, m_height, "YOU WIN!");
 	
 	// END TEST
 }
@@ -258,6 +260,11 @@ void IEngine::drawScene()
 	{
 		m_window->Draw(m_menu);
 	}
+	
+	if(victory)
+	{
+		m_window->Draw(*m_splash);
+	}
 }
 
 
@@ -324,6 +331,9 @@ bool IEngine::collidesWithAny(vec2 pos, float radius)
 		vec2 diff_vector = m_planets[i]->pos - pos;
 		if(diff_vector.length() < (radius + m_planets[i]->rad))
 		{
+			if(m_planets[i]->is_goal)
+				victory = true;
+				
 			return true;
 		}	
 	}
