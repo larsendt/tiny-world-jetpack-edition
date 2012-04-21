@@ -10,11 +10,16 @@ PBody::PBody(){
 }
 
 void PBody::addForce(vec2 force){
-	vel = vel + force * (1.0/mass);
+	vel = vel + force * mass;
 }
 
 void PBody::update(){
 
 	pos = pos + vel;
 
+}
+
+vec2 PBody::nextPos(vec2 force){
+	vec2 tempVel = vel + force * mass;
+	return pos + tempVel;
 }

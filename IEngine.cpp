@@ -22,8 +22,9 @@ IEngine::IEngine(int argc, char** argv)
 	
 	planet.pos = vec2(-20,10);
 	planet.rad = 5.0;
-	planet.mass = 1.0;
+	planet.mass = 0.2;
 	dude.rad = 2.0;
+	dude.mass = 0.02;
 	bones = boneLoadStructure("bones/zombie.bones");
 	boneLoadAnimation(bones, "bones/zombie.anim");
 
@@ -72,8 +73,8 @@ void IEngine::checkKeys(){
 	}
 	
 	if (space){	
-		dude.vel.x += cos(radians(dude.rot)) * .001;
-		dude.vel.y += sin(radians(dude.rot)) * .001;
+		dude.vel.x += cos(radians(dude.rot)) * .02;
+		dude.vel.y += sin(radians(dude.rot)) * .02;
 	}
 	
 	if (space && contact){	
@@ -126,8 +127,6 @@ int IEngine::begin()
 			}
 			
 		}
-		
-		checkKeys();
 		
 		update();
 		
@@ -225,6 +224,7 @@ void IEngine::update()
 	}
 	fps = 1/diff;
 	
+	checkKeys();	
 
 	vec2 gravVector = planet.pos - dude.pos;
 	
@@ -237,20 +237,13 @@ void IEngine::update()
 	//Check intersection
 	if ((diffVector.length() < (dude.rad + planet.rad))){
 		// Reflect on normal
-	
-		dude.vel = dude.vel - (gravNormal * (dot(dude.vel, gravNormal)) * 1.0);
-		contact = 2;
+		dude.vel = vec2(0,0);
 	}
-
-	gravVector = gravVector.normalize() * (1/(dist * dist)) * planet.mass;
-		
-	dude.addForce(gravVector);
-	
-	if (contact > 0){
-		if (dude.vel.length() > .01){
-			dude.vel = dude.vel.normalize() * (dude.vel.length() - .01);
-		}
-		else dude.vel = vec2(0,0);
+	else
+	{
+		//gravVector = gravVector.normalize() * (1/(dist * dist)) * planet.mass;
+		gravVector = gravVector.normalize() * planet.mass;
+		dude.addForce(gravVector);
 	}
 	
 	dude.update();//*multiplier;

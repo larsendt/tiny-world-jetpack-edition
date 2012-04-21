@@ -6,6 +6,7 @@ class PBody{
 		
 		void addForce(vec2 force);
 		void update();
+		vec2 nextPos(vec2 force);
 
 		vec2 pos;
 		vec2 vel;
