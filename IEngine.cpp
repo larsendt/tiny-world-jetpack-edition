@@ -22,10 +22,8 @@ IEngine::IEngine(int argc, char** argv)
 	
 	planet.pos = vec2(-20,10);
 	planet.rad = 5.0;
-	planet.mass = 0.0;
-	planet2.pos = vec2(20,-10);
-	planet2.rad = 10.0;
-	planet.mass = 5.0;
+	planet.mass = 1.0;
+	dude.rad = 2.0;
 	bones = boneLoadStructure("bones/zombie.bones");
 	boneLoadAnimation(bones, "bones/zombie.anim");
 
@@ -170,20 +168,6 @@ void IEngine::drawScene()
 	
 	glEnd();
 	glPopMatrix();
-	glPushMatrix();
-	glTranslatef(planet2.pos.x, planet2.pos.y,0);
-	glBegin(GL_TRIANGLES);
-	
-		for (int i = 0; i < 73; i++){
-			glColor3f(.5,.5,i/73.0);
-			glVertex2f(sin(i/2.5)*planet2.rad, cos(i/2.5)*planet2.rad);
-			glVertex2f(0,0);
-			glVertex2f(sin((i+1)/2.5)*planet2.rad, cos((i+1)/2.5)*planet2.rad);
-		}
-	
-	glEnd();
-	
-	glPopMatrix();
 	
 	glTranslatef(dude.pos.x, dude.pos.y, 0);
 	glRotatef(dude.rot, 0,0,1);
@@ -191,18 +175,26 @@ void IEngine::drawScene()
 
 	// rakkit shep
 	
+	//drawBoneTree(bones);
+	
 	glBegin(GL_TRIANGLES);
 		glVertex2f(-1,-1);
 		glVertex2f(-1,1);
-		glVertex2f(2,0);
+		glVertex2f(1,1);
+		
+		glVertex2f(-1,-1);
+		glVertex2f(1,-1);
+		glVertex2f(1,1);
 		
 	glEnd();
 	
-	//drawBoneTree(bones);
+	
 	glPopMatrix();
+
+	
 	
 	glPopMatrix();	
-		
+	
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 	
 	//p.draw();
@@ -247,31 +239,9 @@ void IEngine::update()
 		// Reflect on normal
 	
 		dude.vel = dude.vel - (gravNormal * (dot(dude.vel, gravNormal)) * 1.0);
-		if (contact > 0) dude.pos = planet.pos + gravNormal * planet.rad + gravNormal * dude.rad;
 		contact = 2;
 	}
 
-	gravVector = gravVector.normalize() * (1/(dist * dist)) * planet.mass;
-		
-	dude.addForce(gravVector);
-	
-	gravVector = planet2.pos - dude.pos;
-	
-	gravNormal = (gravVector * -1).normalize();
-	
-	diffVector = planet.pos - (dude.pos + dude.vel);
-	
-	dist = gravVector.length();
-	
-	//Check intersection
-	if ((gravVector.length() < (dude.rad + planet2.rad))){
-		// Reflect on normal
-	
-		dude.vel = dude.vel - (gravNormal * (dot(dude.vel, gravNormal)) * 1.0);
-		if (contact > 0)dude.pos = planet2.pos + gravNormal * planet2.rad + gravNormal * dude.rad;
-		contact = 2;
-	}
-	
 	gravVector = gravVector.normalize() * (1/(dist * dist)) * planet.mass;
 		
 	dude.addForce(gravVector);
@@ -285,8 +255,8 @@ void IEngine::update()
 	
 	dude.update();//*multiplier;
 	
-	//float mult = (fabs(dotspeed.x) > 2.0 ? 2.0: fabs(dotspeed.x));
-	//boneAnimate(bones, frames, mult);
+	float mult = (fabs(dude.vel.length()) > 2.0 ? 2.0: fabs(dude.vel.length()));
+	boneAnimate(bones, frames, mult);
 	
 	frames++;
 	
