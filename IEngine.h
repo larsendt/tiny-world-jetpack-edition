@@ -22,6 +22,12 @@
 #define radians(i) (i/180.0 * PI)
 #define degrees(i) (i/PI * 180.0)
 
+#define w_gl_to_pix(x) (int)(x * (m_width/gl_width)) + (m_width/2.0)
+#define h_gl_to_pix(y) (int) -((y * (m_height/gl_height)) - (m_height/2.0))
+
+#define w_pix_to_gl(x) (x-m_width/2.0) * (gl_width/m_width)
+#define h_pix_to_gl(y) (-y+m_height/2.0) * (gl_height/m_height)
+
 class IEngine
 {
 	public:
@@ -45,7 +51,13 @@ class IEngine
 		float time;
 		float fps;
 		float m_updateRate;
+		
+		float m_width_ratio;
 		float m_width;
+		float m_height;
+		
+		float gl_width;
+		float gl_height;
 		
 		bool m_wireframe;
 		int contact;

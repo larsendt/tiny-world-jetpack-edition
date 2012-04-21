@@ -13,16 +13,19 @@ IEngine::IEngine(int argc, char** argv)
 {
 	printf("Initializing IEngine\n");
 	initGL(argc, argv);
-	resize(800, 600);
+	m_width = 800;
+	m_height = 600;
+	resize(m_width, m_height);
 	m_time = 0.0;
 	frames = 0;
 	m_updateRate = 1/60.0;
-	m_window->ShowMouseCursor(false);
+	//m_window->ShowMouseCursor(false);
+	m_window->SetCursorPosition(m_width/2.0,m_height/2.0);
 	
 	// TEST STUFF
 	Shader * fbo_shader = new Shader((char*)"shaders/pp.vert",(char*)"shaders/sobel.frag");
 	p.setShader(fbo_shader);
-	p.init(m_window->GetWidth(), m_window->GetHeight());
+	p.init(m_width, m_height);
 	
 	sh = new Shader((char*)"shaders/basic.vert", (char*)"shaders/basic.frag");
 	unsigned int tex = loadImage("textures/shadedplanet.png");
@@ -62,13 +65,34 @@ void IEngine::initGL(int argc, char** argv)
 }
 
 void IEngine::showCursor(){
-	gl_x = (mouse_x - 400) * ((50.0*m_width)/400.0);
-	gl_y = (-mouse_y + 300) * (50.0/300.0);
+	gl_x = w_pix_to_gl(mouse_x);
+	gl_y = h_pix_to_gl(mouse_y);
+	
+	vec2 pos = dude.physics_object.pos;
+	vec2 diff = vec2(gl_x, gl_y)- pos;
+	
+	
+	
+	if (diff.length() > 20.0){
+		diff = diff.normalize() * 20.0;
+	}
+	
+	dude.physics_object.rot = degrees(atan2(diff.y, diff.x));
+	
+	int x = w_gl_to_pix(pos.x + diff.x);
+	int y = h_gl_to_pix(pos.y + diff.y);
+	
+	//printf("calculated pixel coordinates %3.3i,%3.3i\n", x, y);
+	//printf("actual pixel coordinates %3.3i,%3.3i\n", mouse_x, mouse_y);
+	//printf("gl coordinates %f %f\n", pos.x + diff.x, pos.y + diff.y);
+	
+	//m_window->SetCursorPosition(x, );
 	glPushMatrix();
-	glTranslatef(gl_x, gl_y, 0);
+	glTranslatef(pos.x + diff.x, pos.y + diff.y, 0);
 	cursor.draw();
 
 	glPopMatrix();
+	
 }
 
 void IEngine::checkKeys(){
@@ -269,13 +293,16 @@ void IEngine::update()
 void IEngine::resize(int width, int height)
 {
 
-	m_width = (height>0) ? (GLfloat)width/height : 1;
-	
+	m_width_ratio = (height>0) ? (GLfloat)width/height : 1;
+	m_width = width;
+	m_height = height;
 	glViewport(0, 0, width, height);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(-50.0 * m_width,50.0 * m_width,-50.0,50.0,-50.0,50.0);
-	//gluPerspective(45.0,m_width,1,1000);
+	gl_width = 100.0 * m_width_ratio;
+	gl_height = 100.0;
+	glOrtho(-50.0 * m_width_ratio,50.0 * m_width_ratio,-50.0,50.0,-50.0,50.0);
+	//gluPerspective(45.0,m_width_ratio,1,1000);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	p.resize(width, height);
