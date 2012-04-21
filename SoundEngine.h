@@ -17,5 +17,5 @@ public:
 private:
 	sf::Sound JetpackSound;
 	sf::SoundBuffer JetpackBuffer;
-	
+	sf::Music Music1;
 };
