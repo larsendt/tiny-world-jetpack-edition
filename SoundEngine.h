@@ -13,6 +13,7 @@ public:
 	void Load_Music();
 	void Play_Music();
 	void Stop_Music();
+	bool jetpack_playing;
 	
 private:
 	sf::Sound JetpackSound;

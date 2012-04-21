@@ -1,4 +1,5 @@
 #include "SoundEngine.h"
+#include <iostream>
 
 void SoundEngine::Load_Jetpack()
 {
@@ -8,20 +9,35 @@ void SoundEngine::Load_Jetpack()
 		}
 	JetpackSound.SetBuffer(JetpackBuffer);
 	JetpackSound.SetLoop(true);
+	jetpack_playing = false;
 }
 
 void SoundEngine::Play_Jetpack(bool is_playing)
 {
-	JetStatus = JetpackSound.GetStatus();
-	if (is_playing)
+	
+/*	if (is_playing)
 		{
-		if (JetStatus != 2)
-			{
-				JetpackSound.Play();
-			}
+		JetpackSound.Play();
+		}*/
+	
+	JetStatus = JetpackSound.GetStatus();
+	if (is_playing && (!jetpack_playing))
+		{
+		jetpack_playing = true;
+		JetpackSound.Play();
 		}
-
-	else JetpackSound.Stop();
+	
+	else if (is_playing && jetpack_playing)
+		{}
+	
+	else if (!is_playing && jetpack_playing)
+		{
+		JetpackSound.Stop();
+		jetpack_playing = false;
+		}
+		
+	else if (!is_playing && !jetpack_playing)
+		{}
 }
 
 void SoundEngine::Load_Music()
