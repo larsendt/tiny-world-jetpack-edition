@@ -21,7 +21,7 @@ OS := $(shell uname)
 ifeq ($(OS),Linux)
 	LINUX_LIBS = -lsfml-audio -lsfml-graphics -lsfml-window -lsfml-system -lGL -lGLU -lX11 -lm  -L/usr/X11R6/lib 
 else ifeq ($(OS),Darwin)
-	MAC_LIBS = -framework Carbon -framework OpenGL -framework sfml-system -framework sfml-graphics -framework sfml-window -lX11 -lm  -L/usr/X11R6/lib 
+	MAC_LIBS = -framework Carbon -framework OpenGL -framework sfml-system -framework sfml-graphics -framework sfml-window -framework sfml-audio -lX11 -lm  -L/usr/X11R6/lib 
 else
 	@echo "OS not detected"
 endif
