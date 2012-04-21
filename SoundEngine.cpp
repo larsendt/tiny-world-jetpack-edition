@@ -22,7 +22,7 @@ void SoundEngine::Stop_Jetpack()
 
 void SoundEngine::Load_Music()
 {
-	if (!Music1.OpenFromFile("sounds/music.mp3"))
+	if (!Music1.OpenFromFile("sounds/music.ogg"))
 		{
 			// Error...
 		}

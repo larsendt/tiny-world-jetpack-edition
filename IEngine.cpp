@@ -39,6 +39,9 @@ IEngine::IEngine(int argc, char** argv)
 	
 	tex = loadImage("textures/dude.png");
 	
+	sounds.Load_Music();
+	sounds.Play_Music();
+	
 	dude.setPBody(vec2(-20,-20), vec2(0,0), 0, 4.0, .001);
 	dude.setDBody(vec2(-2,4), vec2(2,-4), tex);
 	
@@ -126,11 +129,6 @@ void IEngine::checkKeys(){
 	if (space){	
 		dude.physics_object.vel.x += cos(radians(dude.physics_object.rot)) * .02;
 		dude.physics_object.vel.y += sin(radians(dude.physics_object.rot)) * .02;
-	}
-	
-	if (space && contact){	
-		dude.physics_object.vel.x += cos(radians(dude.physics_object.rot)) * .01;
-		dude.physics_object.vel.y += sin(radians(dude.physics_object.rot)) * .01;
 	}
 	
 }

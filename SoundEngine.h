@@ -1,8 +1,9 @@
 #pragma once
 
 #include <SFML/Audio.hpp>
+#include <stdio.h>
 
-class SoundEngine
+class SoundEngine 
 {
 public:
 	SoundEngine();

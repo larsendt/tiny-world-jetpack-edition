@@ -42,7 +42,7 @@ class IEngine
 		float heightFunction(float i, float j);
 	private:
 	
-		SoundEngine jetpack;
+		SoundEngine sounds;
 	
 		double m_time;
 		sf::RenderWindow* m_window;
