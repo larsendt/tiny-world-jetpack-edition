@@ -36,7 +36,8 @@ IEngine::IEngine(int argc, char** argv)
 
 void IEngine::initGL(int argc, char** argv)
 {
-	m_window = new sf::Window(sf::VideoMode(800, 600, 32), "IEngine");
+	m_window = new sf::RenderWindow(sf::VideoMode(800, 600, 32), "IEngine");
+	m_window->PreserveOpenGLStates(true);	
 	m_clock = new sf::Clock();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
@@ -97,14 +98,23 @@ int IEngine::begin()
 				m_window->Close();
 				return 0;
 			}
-			
+			else if(Event.Type == sf::Event::MouseMoved)
+			{
+				if(m_menu.isActive())
+				{
+					m_menu.mouseHover(Event.MouseMove.X, Event.MouseMove.Y);
+				}
+			}
+			else if(Event.Type == sf::Event::MouseButtonPressed)
+			{
+				m_menu.mouseClick(Event.MouseButton.X, Event.MouseButton.Y);
+			}
 			else if(Event.Type == sf::Event::KeyPressed)
 			{
 				// For one-press keys: (starts to repeat after a while)
 				if(Event.Key.Code == sf::Key::Escape)
 				{
-					m_window->Close();
-					return 0;
+					m_menu.setActive(!m_menu.isActive());
 				}
 				if(Event.Key.Code == sf::Key::M)
 				{
@@ -128,6 +138,13 @@ int IEngine::begin()
 			
 		}
 		
+		if(m_menu.hasAction())
+		{
+			MenuAction action = m_menu.getAction();
+			if(action == Quit)
+				m_window->Close();
+		}
+		
 		update();
 		
 		drawScene();
@@ -141,68 +158,74 @@ int IEngine::begin()
 void IEngine::drawScene()
 {
 	//p.startDraw();
-	
 	if (m_wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
+	
+	if(m_menu.isActive())
+	{
+		m_window->Draw(m_menu);
+	}
 	//glTranslatef(-dotpos.x,-dotpos.y,0);
 	glUseProgram(0);
-	
+
 	glPushMatrix();
-	
+
 	glRotatef(-dude.rot + 90, 0, 0, 1);
 	glTranslatef(-dude.pos.x, -dude.pos.y, 0);
 	glDisable(GL_TEXTURE_2D);
-	
+
 	glPushMatrix();
 	glTranslatef(planet.pos.x, planet.pos.y,0);
 	glBegin(GL_TRIANGLES);
-	
+
 		for (int i = 0; i < 73; i++){
 			glColor3f(.5,.5,1.0);
 			glVertex2f(sin(i/2.5)*planet.rad, cos(i/2.5)*planet.rad);
 			glVertex2f(0,0);
 			glVertex2f(sin((i+1)/2.5)*planet.rad, cos((i+1)/2.5)*planet.rad);
 		}
-	
+
 	glEnd();
 	glPopMatrix();
-	
+
 	glTranslatef(dude.pos.x, dude.pos.y, 0);
 	glRotatef(dude.rot, 0,0,1);
 	glColor3f(1.0,0.0,0.0);
 
 	// rakkit shep
-	
+
 	//drawBoneTree(bones);
-	
+
 	glBegin(GL_TRIANGLES);
 		glVertex2f(-1,-1);
 		glVertex2f(-1,1);
 		glVertex2f(1,1);
-		
+	
 		glVertex2f(-1,-1);
 		glVertex2f(1,-1);
 		glVertex2f(1,1);
-		
+	
 	glEnd();
-	
-	
+
+
 	glPopMatrix();
 
-	
-	
+
+
 	glPopMatrix();	
-	
+
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-	
+
 	//p.draw();
-	
 }
 
 
 void IEngine::update()
 {
+	if(m_menu.isActive())
+		return; 
+		
 	float newTime = m_clock->GetElapsedTime();
 	float diff = newTime-time;
 	

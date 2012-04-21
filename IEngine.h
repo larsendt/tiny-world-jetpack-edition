@@ -14,6 +14,7 @@
 #include "Collision.h"
 #include "Bone.h"
 #include "PBody.h"
+#include "Menu.h"
 
 
 #ifndef IEngine_H
@@ -42,7 +43,7 @@ class IEngine
 		float heightFunction(float i, float j);
 	private:
 		double m_time;
-		sf::Window* m_window;
+		sf::RenderWindow* m_window;
 		sf::Clock* m_clock;
 		int frames;
 		float time;
@@ -61,6 +62,8 @@ class IEngine
 		Planet planet;
 		Planet planet2;
 		PBody dude;		
+		
+		Menu m_menu;
 		
 		float dist;
 };
