@@ -17,6 +17,7 @@
 #include "Menu.h"
 #include "Planet.h"
 #include "SoundEngine.h"
+#include "SplashScreen.h"
 #include <vector>
 
 #define PI 3.1415
@@ -67,8 +68,12 @@ class IEngine
 		int contact;
 		bool moving;
 		
+		bool victory;
+		
 		PostProcess p;
 		Shader * sh;
+		
+		SplashScreen* m_splash;
 
 		std::vector<Planet*> m_planets;
 

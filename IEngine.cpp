@@ -220,8 +220,15 @@ int IEngine::begin()
 
 void IEngine::drawScene()
 {
-	gl_x = ((50 * 400) / (mouse_x - 50));
-	gl_y = ((50 * 300) / (mouse_y - 50));
+	if(mouse_x = 50)
+		gl_x = 50*400;
+	else
+		gl_x = ((50 * 400) / (mouse_x - 50));
+
+	if(mouse_y = 50)
+		gl_y = 50*300;
+	else
+		gl_y = ((50 * 300) / (mouse_y - 50));
 	
 	glPointSize(1.0);
 	

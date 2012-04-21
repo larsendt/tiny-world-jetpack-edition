@@ -45,7 +45,7 @@ clean:
 %.o: %.cpp
 	@echo "Compiling "$@
 	@echo "    CPP       "$<
-	$(CPP) $< $(LINUX_LIBS) $(MAC_LIBS)
+	$(CPP) $< $(LINUX_LIBS) $(MAC_LIBS) -g
 
 $(PROGNAME): $(OBJFILES)
 	@echo "Linking "$@
