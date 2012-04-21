@@ -25,7 +25,11 @@ IEngine::IEngine(int argc, char** argv)
 	
 	sh = new Shader((char*)"shaders/basic.vert", (char*)"shaders/basic.frag");
 	unsigned int tex = loadImage("textures/shadedplanet.png");
-	planet = new Planet(vec2(20,20), 20.0, 1.0, tex);
+	
+	Planet* planet = new Planet(vec2(20,20), 20.0, 1000.0, tex);
+	m_planets.push_back(planet);
+	planet = new Planet(vec2(-30,-30), 10, 500.0, tex);
+	m_planets.push_back(planet);
 	
 	tex = loadImage("textures/dude.png");
 	
@@ -45,7 +49,7 @@ void IEngine::initGL(int argc, char** argv)
 	m_clock = new sf::Clock();
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
-	glPointSize(5.0);
+	glPointSize(1.0);
 	glEnable(GL_POINT_SMOOTH);
 	glLineWidth(2.0);
 	//glEnable(GL_DEPTH_TEST);
@@ -81,15 +85,8 @@ void IEngine::checkKeys(){
 	}
 	
 	if (space){	
-		dude.physics_object.vel.x += cos(radians(dude.physics_object.rot)) * .02;
-		dude.physics_object.vel.y += sin(radians(dude.physics_object.rot)) * .02;
+		dude.physics_object.addForce(vec2(cos(radians(dude.physics_object.rot)) * 7, sin(radians(dude.physics_object.rot)) * 7));
 	}
-	
-	if (space && contact){	
-		dude.physics_object.vel.x += cos(radians(dude.physics_object.rot)) * .01;
-		dude.physics_object.vel.y += sin(radians(dude.physics_object.rot)) * .01;
-	}
-	
 }
 
 int IEngine::begin()
@@ -165,37 +162,51 @@ void IEngine::drawScene()
 	gl_x = ((50 * 400) / (mouse_x - 50));
 	gl_y = ((50 * 300) / (mouse_y - 50));
 	
-	glPointSize(5.0);
+	glPointSize(1.0);
 	
 	glPushMatrix();
 	glTranslatef(mouse_x, mouse_y,0);
 	
-		//printf("%f\n", CheckMouse.MouseMove.X);
 	glBegin(GL_POINTS);
 	glVertex2f(0,0);
 	
 	glEnd();
 	glPopMatrix();
 	
-	//p.startDraw();
-	if (m_wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
 	
+	for(int i = 0; i < m_planets.size(); i++)
+	{
+		m_planets[i]->draw();
+	}
+	
+	dude.draw();	
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glColor3f(1.0, 1.0, 1.0);
+	glBegin(GL_POINTS);	
+	
+	int d = 40;
+	for(int i = 0; i < d; i++)
+	{
+		for(int j = 0; j < d; j++)
+		{
+			float x = (i-(d/2))*(50/(d/2.0))*m_width;
+			float y = (j-(d/2))*(50/(d/2.0));
+			float grav = sumForcesAt(vec2(x, y)).length();
+			glColor3f(grav, grav, grav);
+			glVertex3f(x, y, -0.1);
+		}
+	}
+	glEnd();
+	
+	glColor3f(1, 1, 1);
+
 	if(m_menu.isActive())
 	{
 		m_window->Draw(m_menu);
 	}
-
-	glUseProgram(0);
-
-	planet->draw();
-
-	dude.draw();	
-	
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-	//p.draw();
 }
 
 
@@ -226,25 +237,15 @@ void IEngine::update()
 	fps = 1/diff;
 	
 	checkKeys();	
-
-	vec2 gravVector = planet->pos - dude.physics_object.pos;
 	
-	vec2 gravNormal = (gravVector * -1).normalize();
-	
-	vec2 diffVector = planet->pos - (dude.physics_object.pos + dude.physics_object.vel);
-	
-	float dist = gravVector.length();
-	
-	//Check intersection
-	if ((diffVector.length() < (dude.physics_object.rad + planet->rad))){
-		// Reflect on normal
+	if(collidesWithAny(dude.physics_object.pos + dude.physics_object.vel, dude.physics_object.rad))
+	{
 		dude.physics_object.vel = vec2(0,0);
 	}
 	else
 	{
-		//gravVector = gravVector.normalize() * (1/(dist * dist)) * planet->mass;
-		gravVector = gravVector.normalize() * planet->mass;
-		dude.physics_object.addForce(gravVector);
+		vec2 net_force = sumForcesAt(dude.physics_object.pos);
+		dude.physics_object.addForce(net_force);		
 	}
 	
 	dude.physics_object.update();//*multiplier;
@@ -254,6 +255,32 @@ void IEngine::update()
 	moving = false;
 }
 
+vec2 IEngine::sumForcesAt(vec2 pos)
+{
+	vec2 total_force;
+	for(int i = 0; i < m_planets.size(); i++)
+	{
+		vec2 grav_vector = m_planets[i]->pos - pos;
+		float dist = grav_vector.length() * 1;
+		grav_vector = grav_vector.normalize() * m_planets[i]->mass * (1/(dist*dist));
+		total_force = total_force + grav_vector;
+	}
+	return total_force;		
+}
+
+bool IEngine::collidesWithAny(vec2 pos, float radius)
+{
+	for(int i = 0; i < m_planets.size(); i++)
+	{
+		vec2 diff_vector = m_planets[i]->pos - pos;
+		if(diff_vector.length() < (radius + m_planets[i]->rad))
+		{
+			return true;
+		}	
+	}
+	
+	return false;
+}
 
 void IEngine::resize(int width, int height)
 {

@@ -17,6 +17,7 @@
 #include "Menu.h"
 #include "Planet.h"
 #include "SoundEngine.h"
+#include <vector>
 
 #define PI 3.1415
 #define radians(i) (i/180.0 * PI)
@@ -33,6 +34,9 @@ class IEngine
 		void resize(int width, int height);
 		int begin();
 		float heightFunction(float i, float j);
+		vec2 sumForcesAt(vec2 pos);
+		bool collidesWithAny(vec2 pos, float radius);
+		
 	private:
 	
 		SoundEngine jetpack;
@@ -53,7 +57,8 @@ class IEngine
 		PostProcess p;
 		Shader * sh;
 
-		Planet * planet;
+		std::vector<Planet*> m_planets;
+
 		Entity dude;		
 		
 		Menu m_menu;
