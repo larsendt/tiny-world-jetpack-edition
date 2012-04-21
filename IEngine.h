@@ -51,7 +51,6 @@ class IEngine
 		Shader * sh;
 
 		Planet planet;
-		Planet planet2;
 		PBody dude;		
 		
 		Menu m_menu;

@@ -5,4 +5,5 @@ class Planet{
 		vec2 pos;
 		float rad;
 		float mass;
+		unsigned int tex;
 };
