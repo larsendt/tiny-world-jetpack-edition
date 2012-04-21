@@ -10,14 +10,18 @@ void SoundEngine::Load_Jetpack()
 	JetpackSound.SetLoop(true);
 }
 
-void SoundEngine::Play_Jetpack()
+void SoundEngine::Play_Jetpack(bool is_playing)
 {
-	JetpackSound.Play();
-}
+	JetStatus = JetpackSound.GetStatus();
+	if (is_playing)
+		{
+		if (JetStatus != 2)
+			{
+				JetpackSound.Play();
+			}
+		}
 
-void SoundEngine::Stop_Jetpack()
-{
-	JetpackSound.Stop();
+	else JetpackSound.Stop();
 }
 
 void SoundEngine::Load_Music()
