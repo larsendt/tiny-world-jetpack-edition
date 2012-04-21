@@ -28,10 +28,9 @@ IEngine::IEngine(int argc, char** argv)
 	planet.pos = vec2(-20,10);
 	planet.rad = 5.0;
 	planet.mass = 0.2;
+	planet.tex = loadImage("textures/shadedplanet.png");
 	dude.rad = 2.0;
 	dude.mass = 0.02;
-	bones = boneLoadStructure("bones/zombie.bones");
-	boneLoadAnimation(bones, "bones/zombie.anim");
 
 	contact = 0;
 	moving = false;
@@ -49,7 +48,7 @@ void IEngine::initGL(int argc, char** argv)
 	glPointSize(5.0);
 	glEnable(GL_POINT_SMOOTH);
 	glLineWidth(2.0);
-	glEnable(GL_DEPTH_TEST);
+	//glEnable(GL_DEPTH_TEST);
 	glEnable(GL_TEXTURE_2D);
 }
 
@@ -134,9 +133,6 @@ int IEngine::begin()
 				}
 				if(Event.Key.Code == sf::Key::R)
 				{
-					freeBoneTree(bones);
-					bones = boneLoadStructure("bones/zombie.bones");
-					boneLoadAnimation(bones, "bones/zombie.anim");
 				}
 			}
 			else if(Event.Type == sf::Event::Resized)
@@ -190,27 +186,35 @@ void IEngine::drawScene()
 	{
 		m_window->Draw(m_menu);
 	}
-	//glTranslatef(-dotpos.x,-dotpos.y,0);
+
 	glUseProgram(0);
 
 	glPushMatrix();
 
 		//glRotatef(-dude.rot + 90, 0, 0, 1);
 		//glTranslatef(-dude.pos.x, -dude.pos.y, 0);
-	glDisable(GL_TEXTURE_2D);
-
-	
 	
 	glPushMatrix();
 	glTranslatef(planet.pos.x, planet.pos.y,0);
+	glScalef(planet.rad, planet.rad, 0);
+	
+	bindImage(planet.tex);
+	
 	glBegin(GL_TRIANGLES);
 
-		for (int i = 0; i < 73; i++){
-			glColor3f(.5,.5,1.0);
-			glVertex2f(sin(i/2.5)*planet.rad, cos(i/2.5)*planet.rad);
-			glVertex2f(0,0);
-			glVertex2f(sin((i+1)/2.5)*planet.rad, cos((i+1)/2.5)*planet.rad);
-		}
+		glTexCoord2f(0,0);
+		glVertex2f(-1,-1);
+		glTexCoord2f(0,1);
+		glVertex2f(-1,1);
+		glTexCoord2f(1,1);
+		glVertex2f(1,1);
+	
+		glTexCoord2f(0,0);
+		glVertex2f(-1,-1);
+		glTexCoord2f(1,0);
+		glVertex2f(1,-1);
+		glTexCoord2f(1,1);
+		glVertex2f(1,1);
 
 	glEnd();
 	glPopMatrix();
@@ -220,8 +224,7 @@ void IEngine::drawScene()
 	glColor3f(1.0,0.0,0.0);
 
 	// rakkit shep
-
-	//drawBoneTree(bones);
+	glDisable(GL_TEXTURE_2D);
 
 	glBegin(GL_TRIANGLES);
 		glVertex2f(-1,-1);
@@ -236,7 +239,7 @@ void IEngine::drawScene()
 
 
 	glPopMatrix();
-
+	glEnable(GL_TEXTURE_2D);
 
 
 	glPopMatrix();	
@@ -296,9 +299,6 @@ void IEngine::update()
 	}
 	
 	dude.update();//*multiplier;
-	
-	float mult = (fabs(dude.vel.length()) > 2.0 ? 2.0: fabs(dude.vel.length()));
-	boneAnimate(bones, frames, mult);
 	
 	frames++;
 	

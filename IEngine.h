@@ -2,6 +2,8 @@
 ///           IEngine.h
 //////////////////////////////////////////
 
+#pragma once
+
 #define GL_GLEXT_PROTOTYPES
 #include <math.h>
 #include "Shader.h"
@@ -12,23 +14,13 @@
 #include "PostProcess.h"
 #include "Vec3.h"
 #include "Collision.h"
-#include "Bone.h"
 #include "PBody.h"
 #include "Menu.h"
-
-
-#ifndef IEngine_H
-#define IEngine_H
+#include "Planet.h"
 
 #define PI 3.1415
 #define radians(i) (i/180.0 * PI)
 #define degrees(i) (i/PI * 180.0)
-
-struct Planet{
-	vec2 pos;
-	float rad;
-	float mass;
-};
 
 class IEngine
 {
@@ -57,15 +49,11 @@ class IEngine
 		
 		PostProcess p;
 		Shader * sh;
-		Bone * bones;
 
 		Planet planet;
-		Planet planet2;
 		PBody dude;		
 		
 		Menu m_menu;
 		
 		float dist;
 };
-
-#endif
