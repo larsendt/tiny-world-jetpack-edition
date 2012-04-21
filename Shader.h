@@ -3,8 +3,8 @@
 
 #define GL_GLEXT_PROTOTYPES
 
-#include <GL/gl.h>
-#include <GL/glext.h>
+#include "GLstuff.h"
+#include "glext.h"
 #include <string>
 
 class Shader
