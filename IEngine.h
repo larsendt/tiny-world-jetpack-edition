@@ -7,16 +7,16 @@
 #define GL_GLEXT_PROTOTYPES
 #include <math.h>
 #include "Shader.h"
-#include "ImageLoader.h"
 #include <SFML/Window.hpp>
 #include <SFML/System.hpp>
 #include <stdio.h>
 #include "PostProcess.h"
 #include "Vec3.h"
 #include "Collision.h"
-#include "PBody.h"
+#include "Entity.h"
 #include "Menu.h"
 #include "Planet.h"
+#include "SoundEngine.h"
 
 #define PI 3.1415
 #define radians(i) (i/180.0 * PI)
@@ -34,6 +34,9 @@ class IEngine
 		int begin();
 		float heightFunction(float i, float j);
 	private:
+	
+		SoundEngine jetpack;
+	
 		double m_time;
 		sf::RenderWindow* m_window;
 		sf::Clock* m_clock;
@@ -50,8 +53,8 @@ class IEngine
 		PostProcess p;
 		Shader * sh;
 
-		Planet planet;
-		PBody dude;		
+		Planet * planet;
+		Entity dude;		
 		
 		Menu m_menu;
 		

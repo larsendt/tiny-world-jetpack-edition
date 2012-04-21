@@ -1,3 +1,4 @@
+#pragma once
 #include <SFML/Graphics.hpp>
 #ifdef __APPLE__
 #include <OpenGL/glu.h>
@@ -5,5 +6,5 @@
 #include <GL/glu.h>
 #endif
 #include <stdio.h>
-GLuint loadImage(char* file);
-void bindImage(GLuint img);
+extern GLuint loadImage(char* file);
+extern void bindImage(GLuint img);

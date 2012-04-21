@@ -24,14 +24,14 @@ IEngine::IEngine(int argc, char** argv)
 	p.init(m_window->GetWidth(), m_window->GetHeight());
 	
 	sh = new Shader((char*)"shaders/basic.vert", (char*)"shaders/basic.frag");
+	unsigned int tex = loadImage("textures/shadedplanet.png");
+	planet = new Planet(vec2(20,20), 20.0, 1.0, tex);
 	
-	planet.pos = vec2(-20,10);
-	planet.rad = 5.0;
-	planet.mass = 0.2;
-	planet.tex = loadImage("textures/shadedplanet.png");
-	dude.rad = 2.0;
-	dude.mass = 0.02;
-
+	tex = loadImage("textures/dude.png");
+	
+	dude.setPBody(vec2(-20,-20), vec2(0,0), 0, 4.0, .001);
+	dude.setDBody(vec2(-2,4), vec2(2,-4), tex);
+	
 	contact = 0;
 	moving = false;
 	
@@ -73,21 +73,21 @@ void IEngine::checkKeys(){
 	bool space = input.IsKeyDown(sf::Key::Space);
 	
 	if (d){
-		dude.rot -= 2;
+		dude.physics_object.rot -= 2;
 	}
 	
 	if (a){
-		dude.rot += 2;
+		dude.physics_object.rot += 2;
 	}
 	
 	if (space){	
-		dude.vel.x += cos(radians(dude.rot)) * .02;
-		dude.vel.y += sin(radians(dude.rot)) * .02;
+		dude.physics_object.vel.x += cos(radians(dude.physics_object.rot)) * .02;
+		dude.physics_object.vel.y += sin(radians(dude.physics_object.rot)) * .02;
 	}
 	
 	if (space && contact){	
-		dude.vel.x += cos(radians(dude.rot)) * .01;
-		dude.vel.y += sin(radians(dude.rot)) * .01;
+		dude.physics_object.vel.x += cos(radians(dude.physics_object.rot)) * .01;
+		dude.physics_object.vel.y += sin(radians(dude.physics_object.rot)) * .01;
 	}
 	
 }
@@ -189,61 +189,10 @@ void IEngine::drawScene()
 
 	glUseProgram(0);
 
-	glPushMatrix();
+	planet->draw();
 
-		//glRotatef(-dude.rot + 90, 0, 0, 1);
-		//glTranslatef(-dude.pos.x, -dude.pos.y, 0);
+	dude.draw();	
 	
-	glPushMatrix();
-	glTranslatef(planet.pos.x, planet.pos.y,0);
-	glScalef(planet.rad, planet.rad, 0);
-	
-	bindImage(planet.tex);
-	
-	glBegin(GL_TRIANGLES);
-
-		glTexCoord2f(0,0);
-		glVertex2f(-1,-1);
-		glTexCoord2f(0,1);
-		glVertex2f(-1,1);
-		glTexCoord2f(1,1);
-		glVertex2f(1,1);
-	
-		glTexCoord2f(0,0);
-		glVertex2f(-1,-1);
-		glTexCoord2f(1,0);
-		glVertex2f(1,-1);
-		glTexCoord2f(1,1);
-		glVertex2f(1,1);
-
-	glEnd();
-	glPopMatrix();
-
-	glTranslatef(dude.pos.x, dude.pos.y, 0);
-	glRotatef(dude.rot, 0,0,1);
-	glColor3f(1.0,0.0,0.0);
-
-	// rakkit shep
-	glDisable(GL_TEXTURE_2D);
-
-	glBegin(GL_TRIANGLES);
-		glVertex2f(-1,-1);
-		glVertex2f(-1,1);
-		glVertex2f(1,1);
-	
-		glVertex2f(-1,-1);
-		glVertex2f(1,-1);
-		glVertex2f(1,1);
-	
-	glEnd();
-
-
-	glPopMatrix();
-	glEnable(GL_TEXTURE_2D);
-
-
-	glPopMatrix();	
-
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	//p.draw();
@@ -278,27 +227,27 @@ void IEngine::update()
 	
 	checkKeys();	
 
-	vec2 gravVector = planet.pos - dude.pos;
+	vec2 gravVector = planet->pos - dude.physics_object.pos;
 	
 	vec2 gravNormal = (gravVector * -1).normalize();
 	
-	vec2 diffVector = planet.pos - (dude.pos + dude.vel);
+	vec2 diffVector = planet->pos - (dude.physics_object.pos + dude.physics_object.vel);
 	
 	float dist = gravVector.length();
 	
 	//Check intersection
-	if ((diffVector.length() < (dude.rad + planet.rad))){
+	if ((diffVector.length() < (dude.physics_object.rad + planet->rad))){
 		// Reflect on normal
-		dude.vel = vec2(0,0);
+		dude.physics_object.vel = vec2(0,0);
 	}
 	else
 	{
-		//gravVector = gravVector.normalize() * (1/(dist * dist)) * planet.mass;
-		gravVector = gravVector.normalize() * planet.mass;
-		dude.addForce(gravVector);
+		//gravVector = gravVector.normalize() * (1/(dist * dist)) * planet->mass;
+		gravVector = gravVector.normalize() * planet->mass;
+		dude.physics_object.addForce(gravVector);
 	}
 	
-	dude.update();//*multiplier;
+	dude.physics_object.update();//*multiplier;
 	
 	frames++;
 	
