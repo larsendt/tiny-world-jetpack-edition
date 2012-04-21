@@ -4,10 +4,10 @@ void SoundEngine::Load_Jetpack()
 {
 	if (!JetpackBuffer.LoadFromFile("sounds/jetpack_noise.wav"))
 		{
-			// Error...
+			
 		}
 	JetpackSound.SetBuffer(JetpackBuffer);
-	JetpackSound.SetLoop(TRUE);
+	JetpackSound.SetLoop(true);
 }
 
 void SoundEngine::Play_Jetpack()
@@ -17,5 +17,11 @@ void SoundEngine::Play_Jetpack()
 
 void SoundEngine::Stop_Jetpack()
 {
-	JetpackSound.Stop()
+	JetpackSound.Stop();
 }
+
+SoundEngine::SoundEngine()
+{}
+
+SoundEngine::~SoundEngine()
+{}
