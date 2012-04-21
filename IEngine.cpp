@@ -2,6 +2,11 @@
 ///           IEngine.cpp
 //////////////////////////////////////////
 
+unsigned int mouse_x;
+unsigned int mouse_y;
+float gl_x;
+float gl_y;
+
 #include "IEngine.h"
 
 IEngine::IEngine(int argc, char** argv)
@@ -57,6 +62,9 @@ void IEngine::checkKeys(){
 	bool d = input.IsKeyDown(sf::Key::D);
 	//bool w = input.IsKeyDown(sf::Key::W);
 	//bool s = input.IsKeyDown(sf::Key::S);
+	
+	unsigned int mouse_x          = input.GetMouseX();
+	unsigned int mouse_y		= input.GetMouseY();
 	
 	//bool up = input.IsKeyDown(sf::Key::Up);
 	//bool right = input.IsKeyDown(sf::Key::Right);
@@ -157,6 +165,22 @@ int IEngine::begin()
 
 void IEngine::drawScene()
 {
+	
+	gl_x = ((50 * 400) / (mouse_x - 50));
+	gl_y = ((50 * 300) / (mouse_y - 50));
+	
+	glPointSize(5.0);
+	
+	glPushMatrix();
+	glTranslatef(mouse_x, mouse_y,0);
+	
+		//printf("%f\n", CheckMouse.MouseMove.X);
+	glBegin(GL_POINTS);
+	glVertex2f(0,0);
+	
+	glEnd();
+	glPopMatrix();
+	
 	//p.startDraw();
 	if (m_wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -171,10 +195,12 @@ void IEngine::drawScene()
 
 	glPushMatrix();
 
-	glRotatef(-dude.rot + 90, 0, 0, 1);
-	glTranslatef(-dude.pos.x, -dude.pos.y, 0);
+		//glRotatef(-dude.rot + 90, 0, 0, 1);
+		//glTranslatef(-dude.pos.x, -dude.pos.y, 0);
 	glDisable(GL_TEXTURE_2D);
 
+	
+	
 	glPushMatrix();
 	glTranslatef(planet.pos.x, planet.pos.y,0);
 	glBegin(GL_TRIANGLES);
