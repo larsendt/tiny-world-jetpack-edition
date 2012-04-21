@@ -30,8 +30,6 @@ IEngine::IEngine(int argc, char** argv)
 	planet.mass = 0.2;
 	dude.rad = 2.0;
 	dude.mass = 0.02;
-	bones = boneLoadStructure("bones/zombie.bones");
-	boneLoadAnimation(bones, "bones/zombie.anim");
 
 	contact = 0;
 	moving = false;
@@ -134,9 +132,6 @@ int IEngine::begin()
 				}
 				if(Event.Key.Code == sf::Key::R)
 				{
-					freeBoneTree(bones);
-					bones = boneLoadStructure("bones/zombie.bones");
-					boneLoadAnimation(bones, "bones/zombie.anim");
 				}
 			}
 			else if(Event.Type == sf::Event::Resized)
@@ -221,7 +216,6 @@ void IEngine::drawScene()
 
 	// rakkit shep
 
-	//drawBoneTree(bones);
 
 	glBegin(GL_TRIANGLES);
 		glVertex2f(-1,-1);
@@ -296,9 +290,6 @@ void IEngine::update()
 	}
 	
 	dude.update();//*multiplier;
-	
-	float mult = (fabs(dude.vel.length()) > 2.0 ? 2.0: fabs(dude.vel.length()));
-	boneAnimate(bones, frames, mult);
 	
 	frames++;
 	
