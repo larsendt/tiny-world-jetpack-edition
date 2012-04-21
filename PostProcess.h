@@ -1,5 +1,5 @@
 #include "Shader.h"
-#include <GL/glu.h>
+#include "GLstuff.h"
 #include <stdio.h>
 class PostProcess{
 
