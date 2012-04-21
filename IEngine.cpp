@@ -2,10 +2,10 @@
 ///           IEngine.cpp
 //////////////////////////////////////////
 
-unsigned int mouse_x;
-unsigned int mouse_y;
-float gl_x;
-float gl_y;
+int mouse_x = 0;
+int mouse_y = 0;
+float gl_x = 0;
+float gl_y = 0;
 
 #include "IEngine.h"
 
@@ -17,6 +17,7 @@ IEngine::IEngine(int argc, char** argv)
 	m_time = 0.0;
 	frames = 0;
 	m_updateRate = 1/60.0;
+	m_window->ShowMouseCursor(false);
 	
 	// TEST STUFF
 	Shader * fbo_shader = new Shader((char*)"shaders/pp.vert",(char*)"shaders/sobel.frag");
@@ -27,6 +28,12 @@ IEngine::IEngine(int argc, char** argv)
 	unsigned int tex = loadImage("textures/shadedplanet.png");
 	planet = new Planet(vec2(20,20), 20.0, 1.0, tex);
 	
+	cursor.tex = tex;
+	cursor.bottom = -1.0;
+	cursor.top = 1.0;
+	cursor.left = -1.0;
+	cursor.right = 1.0;
+	
 	tex = loadImage("textures/dude.png");
 	
 	dude.setPBody(vec2(-20,-20), vec2(0,0), 0, 4.0, .001);
@@ -34,6 +41,8 @@ IEngine::IEngine(int argc, char** argv)
 	
 	contact = 0;
 	moving = false;
+	
+	
 	
 	// END TEST
 }
@@ -52,6 +61,16 @@ void IEngine::initGL(int argc, char** argv)
 	glEnable(GL_TEXTURE_2D);
 }
 
+void IEngine::showCursor(){
+	gl_x = (mouse_x - 400) * ((50.0*m_width)/400.0);
+	gl_y = (-mouse_y + 300) * (50.0/300.0);
+	glPushMatrix();
+	glTranslatef(gl_x, gl_y, 0);
+	cursor.draw();
+
+	glPopMatrix();
+}
+
 void IEngine::checkKeys(){
 
 	// This function deals with constant keypresses.
@@ -62,8 +81,8 @@ void IEngine::checkKeys(){
 	//bool w = input.IsKeyDown(sf::Key::W);
 	//bool s = input.IsKeyDown(sf::Key::S);
 	
-	unsigned int mouse_x          = input.GetMouseX();
-	unsigned int mouse_y		= input.GetMouseY();
+	mouse_x = input.GetMouseX();
+	mouse_y =  input.GetMouseY();
 	
 	//bool up = input.IsKeyDown(sf::Key::Up);
 	//bool right = input.IsKeyDown(sf::Key::Right);
@@ -149,9 +168,13 @@ int IEngine::begin()
 				m_window->Close();
 		}
 		
+		checkKeys();
+		
 		update();
 		
 		drawScene();
+		
+		showCursor();
 		
 		m_window->Display();
 	}
@@ -161,26 +184,14 @@ int IEngine::begin()
 
 void IEngine::drawScene()
 {
-	
-	gl_x = ((50 * 400) / (mouse_x - 50));
-	gl_y = ((50 * 300) / (mouse_y - 50));
-	
-	glPointSize(5.0);
-	
-	glPushMatrix();
-	glTranslatef(mouse_x, mouse_y,0);
-	
-		//printf("%f\n", CheckMouse.MouseMove.X);
-	glBegin(GL_POINTS);
-	glVertex2f(0,0);
-	
-	glEnd();
-	glPopMatrix();
-	
-	//p.startDraw();
+
 	if (m_wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
+
+	
+
+	glEnable(GL_TEXTURE_2D);
 	
 	if(m_menu.isActive())
 	{
@@ -192,6 +203,8 @@ void IEngine::drawScene()
 	planet->draw();
 
 	dude.draw();	
+	
+	
 	
 	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
@@ -225,8 +238,6 @@ void IEngine::update()
 	}
 	fps = 1/diff;
 	
-	checkKeys();	
-
 	vec2 gravVector = planet->pos - dude.physics_object.pos;
 	
 	vec2 gravNormal = (gravVector * -1).normalize();

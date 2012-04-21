@@ -27,6 +27,7 @@ class IEngine
 	public:
 		IEngine(int argc, char** argv);
 		void initGL(int argc, char** argv);
+		void showCursor();
 		void checkKeys();
 		void drawScene();
 		void update();
@@ -54,7 +55,8 @@ class IEngine
 		Shader * sh;
 
 		Planet * planet;
-		Entity dude;		
+		Entity dude;
+		DBody cursor;		
 		
 		Menu m_menu;
 		
