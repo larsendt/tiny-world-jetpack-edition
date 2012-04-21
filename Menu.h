@@ -1,6 +1,6 @@
 #pragma once
 
-#include <GL/gl.h>
+#include "GLstuff.h"
 #include <SFML/System.hpp>
 #include <SFML/Window.hpp>
 #include <SFML/Graphics.hpp>
