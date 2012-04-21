@@ -24,13 +24,7 @@ IEngine::IEngine(int argc, char** argv)
 	dotspeed.x = .2;
 	bones = boneLoadStructure("bones/zombie.bones");
 	boneLoadAnimation(bones, "bones/zombie.anim");
-	//printBoneTree(bones, 1);
 
-	dist = 10;
-	floor.a = vec2(-200,-50);
-	floor.b = vec2(200,-50);
-	floor.n = vec2(0,1);
-	
 	contact = 0;
 	moving = false;
 	
@@ -77,7 +71,7 @@ void IEngine::checkKeys(){
 		moving = true;
 	}
 	
-	if (space && contact){
+	if (space){
 		dotspeed.y += .2;
 	}
 	
@@ -142,11 +136,13 @@ int IEngine::begin()
 void IEngine::drawScene()
 {
 	//p.startDraw();
+	
 	if (m_wireframe) glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
 	//glTranslatef(-dotpos.x,-dotpos.y,0);
 	glUseProgram(0);
+	
 	glDisable(GL_TEXTURE_2D);
 
 	
@@ -226,17 +222,6 @@ void IEngine::update()
 		}
 	}
 	
-	double radius = 10;
-	double d = distanceToPlane(floor, dotpos-(floor.n*radius), dotspeed);
-	double bouncy = .1;
-	
-	if (contact>0) contact--;
-
-	if (d < 0 && dot(dotspeed, floor.n)<0.0){
-		dotspeed = dotspeed - (floor.n * (dot(dotspeed, floor.n)) * (1+bouncy));
-		contact = 5;
-	}
-	
 	dotpos = dotpos + dotspeed;//*multiplier;
 	
 	frames++;
@@ -257,6 +242,5 @@ void IEngine::resize(int width, int height)
 	//gluPerspective(45.0,m_width,1,1000);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	resizeFonts(width, height);
 	p.resize(width, height);
 }
