@@ -2,10 +2,10 @@
 ///           IEngine.cpp
 //////////////////////////////////////////
 
-unsigned int mouse_x;
-unsigned int mouse_y;
-float gl_x;
-float gl_y;
+int mouse_x = 0;
+int mouse_y = 0;
+float gl_x = 0;
+float gl_y = 0;
 
 #include "IEngine.h"
 
@@ -13,15 +13,19 @@ IEngine::IEngine(int argc, char** argv)
 {
 	printf("Initializing IEngine\n");
 	initGL(argc, argv);
-	resize(800, 600);
+	m_width = 800;
+	m_height = 600;
+	resize(m_width, m_height);
 	m_time = 0.0;
 	frames = 0;
 	m_updateRate = 1/60.0;
+	//m_window->ShowMouseCursor(false);
+	m_window->SetCursorPosition(m_width/2.0,m_height/2.0);
 	
 	// TEST STUFF
 	Shader * fbo_shader = new Shader((char*)"shaders/pp.vert",(char*)"shaders/sobel.frag");
 	p.setShader(fbo_shader);
-	p.init(m_window->GetWidth(), m_window->GetHeight());
+	p.init(m_width, m_height);
 	
 	sh = new Shader((char*)"shaders/basic.vert", (char*)"shaders/basic.frag");
 	unsigned int tex = loadImage("textures/shadedplanet.png");
@@ -31,13 +35,24 @@ IEngine::IEngine(int argc, char** argv)
 	planet = new Planet(vec2(-30,-30), 10, 500.0, tex);
 	m_planets.push_back(planet);
 	
+	cursor.tex = tex;
+	cursor.bottom = -1.0;
+	cursor.top = 1.0;
+	cursor.left = -1.0;
+	cursor.right = 1.0;
+	
 	tex = loadImage("textures/dude.png");
+	
+	sounds.Load_Music();
+	sounds.Play_Music();
 	
 	dude.setPBody(vec2(-20,-20), vec2(0,0), 0, 4.0, .001);
 	dude.setDBody(vec2(-2,4), vec2(2,-4), tex);
 	
 	contact = 0;
 	moving = false;
+	
+	
 	
 	// END TEST
 }
@@ -56,6 +71,37 @@ void IEngine::initGL(int argc, char** argv)
 	glEnable(GL_TEXTURE_2D);
 }
 
+void IEngine::showCursor(){
+	gl_x = w_pix_to_gl(mouse_x);
+	gl_y = h_pix_to_gl(mouse_y);
+	
+	vec2 pos = dude.physics_object.pos;
+	vec2 diff = vec2(gl_x, gl_y)- pos;
+	
+	
+	
+	if (diff.length() > 20.0){
+		diff = diff.normalize() * 20.0;
+	}
+	
+	dude.physics_object.rot = degrees(atan2(diff.y, diff.x));
+	
+	int x = w_gl_to_pix(pos.x + diff.x);
+	int y = h_gl_to_pix(pos.y + diff.y);
+	
+	//printf("calculated pixel coordinates %3.3i,%3.3i\n", x, y);
+	//printf("actual pixel coordinates %3.3i,%3.3i\n", mouse_x, mouse_y);
+	//printf("gl coordinates %f %f\n", pos.x + diff.x, pos.y + diff.y);
+	
+	//m_window->SetCursorPosition(x, );
+	glPushMatrix();
+	glTranslatef(pos.x + diff.x, pos.y + diff.y, 0);
+	cursor.draw();
+
+	glPopMatrix();
+	
+}
+
 void IEngine::checkKeys(){
 
 	// This function deals with constant keypresses.
@@ -66,8 +112,8 @@ void IEngine::checkKeys(){
 	//bool w = input.IsKeyDown(sf::Key::W);
 	//bool s = input.IsKeyDown(sf::Key::S);
 	
-	unsigned int mouse_x          = input.GetMouseX();
-	unsigned int mouse_y		= input.GetMouseY();
+	mouse_x = input.GetMouseX();
+	mouse_y =  input.GetMouseY();
 	
 	//bool up = input.IsKeyDown(sf::Key::Up);
 	//bool right = input.IsKeyDown(sf::Key::Right);
@@ -85,7 +131,7 @@ void IEngine::checkKeys(){
 	}
 	
 	if (space){	
-		dude.physics_object.addForce(vec2(cos(radians(dude.physics_object.rot)) * 7, sin(radians(dude.physics_object.rot)) * 7));
+		dude.physics_object.addForce(vec2(cos(radians(dude.physics_object.rot)) * 5, sin(radians(dude.physics_object.rot)) * 5));
 	}
 }
 
@@ -146,9 +192,13 @@ int IEngine::begin()
 				m_window->Close();
 		}
 		
+		checkKeys();
+		
 		update();
 		
 		drawScene();
+		
+		showCursor();
 		
 		m_window->Display();
 	}
@@ -158,7 +208,6 @@ int IEngine::begin()
 
 void IEngine::drawScene()
 {
-	
 	gl_x = ((50 * 400) / (mouse_x - 50));
 	gl_y = ((50 * 300) / (mouse_y - 50));
 	
@@ -175,6 +224,8 @@ void IEngine::drawScene()
 	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
+
+	glEnable(GL_TEXTURE_2D);
 	
 	for(int i = 0; i < m_planets.size(); i++)
 	{
@@ -192,7 +243,7 @@ void IEngine::drawScene()
 	{
 		for(int j = 0; j < d; j++)
 		{
-			float x = (i-(d/2))*(50/(d/2.0))*m_width;
+			float x = (i-(d/2))*(50/(d/2.0))*m_width_ratio;
 			float y = (j-(d/2))*(50/(d/2.0));
 			float grav = sumForcesAt(vec2(x, y)).length();
 			glColor3f(grav, grav, grav);
@@ -235,8 +286,6 @@ void IEngine::update()
 		multiplier = time / m_updateRate;
 	}
 	fps = 1/diff;
-	
-	checkKeys();	
 	
 	if(collidesWithAny(dude.physics_object.pos + dude.physics_object.vel, dude.physics_object.rad))
 	{
@@ -285,13 +334,16 @@ bool IEngine::collidesWithAny(vec2 pos, float radius)
 void IEngine::resize(int width, int height)
 {
 
-	m_width = (height>0) ? (GLfloat)width/height : 1;
-	
+	m_width_ratio = (height>0) ? (GLfloat)width/height : 1;
+	m_width = width;
+	m_height = height;
 	glViewport(0, 0, width, height);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	glOrtho(-50.0 * m_width,50.0 * m_width,-50.0,50.0,-50.0,50.0);
-	//gluPerspective(45.0,m_width,1,1000);
+	gl_width = 100.0 * m_width_ratio;
+	gl_height = 100.0;
+	glOrtho(-50.0 * m_width_ratio,50.0 * m_width_ratio,-50.0,50.0,-50.0,50.0);
+	//gluPerspective(45.0,m_width_ratio,1,1000);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	p.resize(width, height);

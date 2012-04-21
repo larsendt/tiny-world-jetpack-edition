@@ -20,6 +20,24 @@ void SoundEngine::Stop_Jetpack()
 	JetpackSound.Stop();
 }
 
+void SoundEngine::Load_Music()
+{
+	if (!Music1.OpenFromFile("sounds/music.ogg"))
+		{
+			// Error...
+		}
+	Music1.SetLoop(true);
+}
+void SoundEngine::Play_Music()
+{
+	Music1.Play();
+}
+void SoundEngine::Stop_Music()
+{
+	Music1.Pause();
+}
+
+
 SoundEngine::SoundEngine()
 {}
 
