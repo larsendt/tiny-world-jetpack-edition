@@ -1,10 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #define GL_GLEXT_PROTOTYPES
-#ifndef USE_GLEW
-	//#include <GL/glew.h>
-#endif
-#include <GL/gl.h>
+#include "GLstuff.h"
 
 #ifndef SHADER_FUNCS
 #define SHADER_FUNCS
