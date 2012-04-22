@@ -21,13 +21,15 @@ void ParticleEngine::update(){
 }
 
 void ParticleEngine::draw(){
+	float ratio;
 	glBegin(GL_POINTS);
 	
 	for (int i =0; i < MAX_PARTICLES; i++){
 		if (life[i] <= 0.0){
 			continue;
 		}
-		glColor4f(0,0,1,life[i]/100.0);
+		ratio = life[i]/100.0;
+		glColor4f(.8*ratio,.3*ratio,.05*ratio,1.0);
 		glVertex3f(positions[i].x, positions[i].y, 0);
 	}
 	

@@ -137,20 +137,15 @@ void IEngine::checkKeys(){
 	// This function deals with constant keypresses.
 	
 	const sf::Input& input = m_window->GetInput();
-	bool a = input.IsKeyDown(sf::Key::A);
-	bool d = input.IsKeyDown(sf::Key::D);
+	bool lbutton = input.IsMouseButtonDown(sf::Mouse::Left);
 	
 	mouse_x = input.GetMouseX();
 	mouse_y =  input.GetMouseY();
 
 	bool space = input.IsKeyDown(sf::Key::Space);
 	
-	if (d){
+	if (lbutton){
 		weapon.shoot();
-	}
-	
-	if (a){
-		dude.physics_object.rot += 2;
 	}
 	
 	if (space && (fuel>=1.0)){	
@@ -255,6 +250,32 @@ void IEngine::drawScene()
 	glEnable(GL_TEXTURE_2D);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
+
+	glPointSize(3.0);
+	
+	weapon.drawParticles();
+	
+	glPointSize(5.0);
+	glDisable(GL_DEPTH_TEST);
+	
+	glLineWidth(5.0);
+	glColor3f(0.0,1.0,.5);
+	glBegin(GL_LINE_STRIP);
+	
+	for (int i =0; i< 100; i++){
+		glColor3f(.5 - i/200.0,1.0 - i/100.0,.5 - i/200.0);
+		glVertex2f(futurePositions[i].x, futurePositions[i].y);
+	}
+
+	glEnd();
+	
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
+	
+	pengine.draw();
+	
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_DEPTH_TEST);
+
 	glColor3f(0.0,0.0,1.0);
 	glBegin(GL_TRIANGLES);
 	
@@ -284,31 +305,6 @@ void IEngine::drawScene()
 		}
 	}
 	glEnd();*/
-	
-	glPointSize(3.0);
-	
-	weapon.drawParticles();
-	
-	glPointSize(5.0);
-	glDisable(GL_DEPTH_TEST);
-	
-	glLineWidth(2.0);
-	glColor3f(0.0,1.0,.5);
-	glBegin(GL_POINTS);
-	
-	for (int i =0; i< 200; i++){
-		glColor3f(1.0 - i/200.0,1.0 - i/200.0,.5 - i/400.0);
-		glVertex2f(futurePositions[i].x, futurePositions[i].y);
-	}
-
-	glEnd();
-	
-	glBlendFunc(GL_SRC_COLOR, GL_SRC_ALPHA_SATURATE);
-	
-	pengine.draw();
-	
-	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glEnable(GL_DEPTH_TEST);
 	
 	glColor3f(1.0, 1.0, 1.0);
 	
@@ -377,11 +373,16 @@ void IEngine::update()
 	vec2 vel = dude.physics_object.vel;
 	float mass = dude.physics_object.mass;
 	
-	for (int i = 0; i< 200; i++){
+	vec2 force;
+	
+	for (int i = 0; i< 100; i++){
+		
+		for (int iterations = 0; iterations < 5; iterations ++){
+			force = sumForcesAt(p);
+			vel = vel + (force * (1/mass));
+			p = p + vel;
+		}
 		futurePositions[i] = p;
-		vec2 force = sumForcesAt(p);
-		vel = vel + (force * (1/mass));
-		p = p + vel;
 	}
 	
 	if (endzone.checkIfInside(dude.physics_object.pos, dude.physics_object.rad) && !won){ 

@@ -51,7 +51,7 @@ class IEngine
 	
 		Weapon weapon;
 	
-		vec2 futurePositions[200];
+		vec2 futurePositions[100];
 	
 		double m_time;
 		sf::RenderWindow* m_window;
