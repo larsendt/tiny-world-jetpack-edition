@@ -8,6 +8,9 @@ float gl_x = 0;
 float gl_y = 0;
 
 #include "IEngine.h"
+#include "Level.h"
+
+#include <stdlib.h>
 
 IEngine::IEngine(int argc, char** argv)
 {
@@ -22,33 +25,15 @@ IEngine::IEngine(int argc, char** argv)
 	//m_window->ShowMouseCursor(false);
 	m_window->SetCursorPosition(m_width/2.0,m_height/2.0);
 	
+	
 	// TEST STUFF
 	Shader * fbo_shader = new Shader((char*)"shaders/pp.vert",(char*)"shaders/sobel.frag");
 	p.setShader(fbo_shader);
 	p.init(m_width, m_height);
 	
 	sh = new Shader((char*)"shaders/basic.vert", (char*)"shaders/basic.frag");
-	unsigned int tex = loadImage("textures/shadedplanet.png");
-	
-	Planet* planet = new Planet(vec2(80,0),10.0, 100.0, tex);
-	m_planets.push_back(planet);
-	planet = new Planet(vec2(30,80),30.0, 500.0, tex);
-	m_planets.push_back(planet);
-	planet = new Planet(vec2(30,-80),30.0, 500.0, tex);
-	m_planets.push_back(planet);
-	planet = new Planet(vec2(-40,0), 10.0, 100.0, tex);
-	m_planets.push_back(planet);
-	
+	unsigned int tex = loadImage("textures/shadedplanet.png");	
 	tex = loadImage("textures/shadedplanet2.png");
-	
-	planet = new Planet(vec2(50,0), 10.0, -100.0, tex);
-	m_planets.push_back(planet);
-	
-	planet = new Planet(vec2(-20,40), 10.0, -100.0, tex);
-	m_planets.push_back(planet);
-	planet = new Planet(vec2(-20,-40), 10.0, -100.0, tex);
-	m_planets.push_back(planet);
-	
 	cursor.tex = tex;
 	cursor.bottom = -1.0;
 	cursor.top = 1.0;
@@ -56,16 +41,10 @@ IEngine::IEngine(int argc, char** argv)
 	cursor.right = 1.0;
 	
 	tex = loadImage("textures/dude.png");
-	
-	endzone.init(vec2(-80,0), -15, 15, 15, -15);
-	
-	sounds.Load_Music();
-	sounds.Load_Jetpack();
-	
-	dude.setPBody(vec2(-0,-0), vec2(0,0), 0, 2.0, 20.0);
-	dude.setDBody(vec2(-2,4), vec2(2,-4), tex);
-	
-	weapon.init(&dude.physics_object);
+
+	curLevel = 0;
+	loadLevels();	
+	loadLevel(curLevel);
 	
 	contact = 0;
 	won = false;
@@ -205,11 +184,16 @@ int IEngine::begin()
 				}
 				if(Event.Key.Code == sf::Key::R)
 				{
-					dude.physics_object.pos = vec2(0,0);
+					dude.physics_object.pos = initialDudePos;
 					dude.physics_object.vel = vec2(0,0);
 					fuel = 100;
 					sounds.Stop_Music();
 					won = false;
+				}
+				if(Event.Key.Code == sf::Key::L)
+				{
+					curLevel = (curLevel + 1) % m_levels.size();
+					loadLevel(curLevel);
 				}
 			}
 			else if(Event.Type == sf::Event::Resized)
@@ -358,7 +342,7 @@ void IEngine::update()
 	{
 		pengine.createParticles(dude.physics_object.pos,dude.physics_object.vel ,50);
 		dude.physics_object.vel = vec2(0,0);
-		dude.physics_object.pos = vec2(0,0);
+		dude.physics_object.pos = initialDudePos;
 		fuel = 100;
 		sounds.Stop_Music();
 		won = false;
@@ -447,4 +431,38 @@ void IEngine::resize(int width, int height)
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	p.resize(width, height);
+}
+
+void IEngine::loadLevels()
+{
+	Level* level = new Level("levels/level1.jetworld");
+	m_levels.push_back(level);
+
+	level = new Level("levels/level2.jetworld");
+	m_levels.push_back(level);
+
+	level = new Level("levels/level3.jetworld");
+	m_levels.push_back(level);
+}
+
+void IEngine::loadLevel(int levelid)
+{
+	Level* level = m_levels[levelid];
+	printf("%s\n", level->name.c_str());
+	
+	m_planets = level->planets;
+	endzone = level->goalZone;
+
+	sounds.Load_Music();
+	sounds.Load_Jetpack();
+	
+	dude = level->dude;
+	weapon.init(&dude.physics_object);
+	
+	initialDudePos = dude.physics_object.pos;
+	dude.physics_object.vel = vec2(0,0);
+	fuel = 100;
+	sounds.Stop_Music();
+	won = false;
+
 }
