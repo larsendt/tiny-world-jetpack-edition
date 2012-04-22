@@ -9,6 +9,7 @@ void SoundEngine::Load_Jetpack()
 		}
 	JetpackSound.SetBuffer(JetpackBuffer);
 	JetpackSound.SetLoop(true);
+	JetpackSound.SetVolume(20);
 	jetpack_playing = false;
 }
 

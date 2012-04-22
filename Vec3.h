@@ -1,6 +1,11 @@
-#ifndef VECTOR
-#define VECTOR
+#pragma once
+
 #include <math.h>
+
+#define PI 3.1415
+#define radians(i) (i/180.0 * PI)
+#define degrees(i) (i/PI * 180.0)
+
 class vec3{
 	public:
 		vec3();
@@ -28,5 +33,3 @@ class vec3{
 double angle(vec3 a, vec3 b);
 double dot(vec3 a, vec3 b);
 vec3 cross(vec3 a, vec3 b);
-
-#endif

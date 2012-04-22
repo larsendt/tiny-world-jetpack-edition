@@ -17,12 +17,10 @@
 #include "Menu.h"
 #include "Planet.h"
 #include "SoundEngine.h"
-#include "SplashScreen.h"
+#include "ParticleEngine.h"
+#include "GoalZone.h"
+#include "Weapon.h"
 #include <vector>
-
-#define PI 3.1415
-#define radians(i) (i/180.0 * PI)
-#define degrees(i) (i/PI * 180.0)
 
 #define w_gl_to_pix(x) (int)(x * (m_width/gl_width)) + (m_width/2.0)
 #define h_gl_to_pix(y) (int) -((y * (m_height/gl_height)) - (m_height/2.0))
@@ -47,7 +45,13 @@ class IEngine
 		
 	private:
 	
+		ParticleEngine pengine;
 		SoundEngine sounds;
+		GoalZone endzone;
+	
+		Weapon weapon;
+	
+		vec2 futurePositions[200];
 	
 		double m_time;
 		sf::RenderWindow* m_window;
@@ -64,16 +68,14 @@ class IEngine
 		float gl_width;
 		float gl_height;
 		
+		float fuel;
+		
 		bool m_wireframe;
 		int contact;
-		bool moving;
-		
-		bool victory;
+		bool won;
 		
 		PostProcess p;
 		Shader * sh;
-		
-		SplashScreen* m_splash;
 
 		std::vector<Planet*> m_planets;
 

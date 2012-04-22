@@ -30,9 +30,23 @@ IEngine::IEngine(int argc, char** argv)
 	sh = new Shader((char*)"shaders/basic.vert", (char*)"shaders/basic.frag");
 	unsigned int tex = loadImage("textures/shadedplanet.png");
 	
-	Planet* planet = new Planet(vec2(20,20), 20.0, 1000.0, tex, true);
+	Planet* planet = new Planet(vec2(80,0),10.0, 100.0, tex);
 	m_planets.push_back(planet);
-	planet = new Planet(vec2(-30,-30), 10, 500.0, tex);
+	planet = new Planet(vec2(30,80),30.0, 500.0, tex);
+	m_planets.push_back(planet);
+	planet = new Planet(vec2(30,-80),30.0, 500.0, tex);
+	m_planets.push_back(planet);
+	planet = new Planet(vec2(-40,0), 10.0, 100.0, tex);
+	m_planets.push_back(planet);
+	
+	tex = loadImage("textures/shadedplanet2.png");
+	
+	planet = new Planet(vec2(50,0), 10.0, -100.0, tex);
+	m_planets.push_back(planet);
+	
+	planet = new Planet(vec2(-20,40), 10.0, -100.0, tex);
+	m_planets.push_back(planet);
+	planet = new Planet(vec2(-20,-40), 10.0, -100.0, tex);
 	m_planets.push_back(planet);
 	
 	cursor.tex = tex;
@@ -43,19 +57,22 @@ IEngine::IEngine(int argc, char** argv)
 	
 	tex = loadImage("textures/dude.png");
 	
+	endzone.init(vec2(-80,0), -15, 15, 15, -15);
+	
 	sounds.Load_Music();
-		//sounds.Play_Music();
 	sounds.Load_Jetpack();
 	
-	dude.setPBody(vec2(-20,-20), vec2(0,0), 0, 4.0, .001);
+	dude.setPBody(vec2(-0,-0), vec2(0,0), 0, 2.0, 20.0);
 	dude.setDBody(vec2(-2,4), vec2(2,-4), tex);
 	
+	weapon.init(&dude.physics_object);
+	
 	contact = 0;
-	moving = false;
+	won = false;
 	
-	victory = false;
+	fuel = 100.0;
 	
-	m_splash = new SplashScreen(m_width, m_height, "YOU WIN!");
+	m_menu.setActive(true);
 	
 	// END TEST
 }
@@ -70,7 +87,12 @@ void IEngine::initGL(int argc, char** argv)
 	glPointSize(1.0);
 	glEnable(GL_POINT_SMOOTH);
 	glLineWidth(2.0);
-	//glEnable(GL_DEPTH_TEST);
+	glEnable(GL_DEPTH_TEST);
+	glEnable(GL_ALPHA);
+	glEnable(GL_ALPHA_TEST);
+	glEnable(GL_BLEND);
+	glAlphaFunc(GL_GREATER,0.1f);
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_TEXTURE_2D);
 }
 
@@ -107,6 +129,9 @@ void IEngine::showCursor(){
 
 void IEngine::checkKeys(){
 
+	if(m_menu.isActive())
+		return; 
+
 	bool jetpack;
 	
 	// This function deals with constant keypresses.
@@ -114,30 +139,27 @@ void IEngine::checkKeys(){
 	const sf::Input& input = m_window->GetInput();
 	bool a = input.IsKeyDown(sf::Key::A);
 	bool d = input.IsKeyDown(sf::Key::D);
-	//bool w = input.IsKeyDown(sf::Key::W);
-	//bool s = input.IsKeyDown(sf::Key::S);
 	
 	mouse_x = input.GetMouseX();
 	mouse_y =  input.GetMouseY();
-	
-	//bool up = input.IsKeyDown(sf::Key::Up);
-	//bool right = input.IsKeyDown(sf::Key::Right);
-	//bool down = input.IsKeyDown(sf::Key::Down);
-	//bool left = input.IsKeyDown(sf::Key::Left);
 
 	bool space = input.IsKeyDown(sf::Key::Space);
 	
 	if (d){
-		dude.physics_object.rot -= 2;
+		weapon.shoot();
 	}
 	
 	if (a){
 		dude.physics_object.rot += 2;
 	}
 	
-	if (space){	
-		dude.physics_object.addForce(vec2(cos(radians(dude.physics_object.rot)) * 5, sin(radians(dude.physics_object.rot)) * 5));
+	if (space && (fuel>=1.0)){	
+		float x = cos(radians(dude.physics_object.rot))*.2;
+		float y = sin(radians(dude.physics_object.rot))*.2;
+		dude.physics_object.addForce(vec2(x, y));
+		pengine.createParticles(dude.physics_object.pos,dude.physics_object.vel + vec2(-x*.5, -y*.5),5);
 		jetpack = true;
+		fuel --;
 	}
 	
 	if (!space){
@@ -188,6 +210,11 @@ int IEngine::begin()
 				}
 				if(Event.Key.Code == sf::Key::R)
 				{
+					dude.physics_object.pos = vec2(0,0);
+					dude.physics_object.vel = vec2(0,0);
+					fuel = 100;
+					sounds.Stop_Music();
+					won = false;
 				}
 			}
 			else if(Event.Type == sf::Event::Resized)
@@ -220,67 +247,87 @@ int IEngine::begin()
 
 void IEngine::drawScene()
 {
-	if(mouse_x = 50)
-		gl_x = 50*400;
-	else
-		gl_x = ((50 * 400) / (mouse_x - 50));
-
-	if(mouse_y = 50)
-		gl_y = 50*300;
-	else
-		gl_y = ((50 * 300) / (mouse_y - 50));
 	
-	glPointSize(1.0);
-	
-	glPushMatrix();
-	glTranslatef(mouse_x, mouse_y,0);
-	
-	glBegin(GL_POINTS);
-	glVertex2f(0,0);
-	
-	glEnd();
-	glPopMatrix();
 	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
 
 	glEnable(GL_TEXTURE_2D);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glColor3f(0.0,0.0,1.0);
+	glBegin(GL_TRIANGLES);
+	
+	glVertex2f(100, -100);
+	glVertex2f(100, (fuel/100.0 * 200)-100);
+	glVertex2f(90, (fuel/100.0 * 200)-110);
+	
+	glVertex2f(100, -100);
+	glVertex2f(90, -100);
+	glVertex2f(90, (fuel/100.0 * 200)-110);
+	
+	glEnd();
+	
+	/*glPointSize(1.0);
+	
+	glBegin(GL_POINTS);	
+	int d = 80;
+	for(int i = 0; i < d; i++)
+	{
+		for(int j = 0; j < d; j++)
+		{
+			float x = (i-(d/2))*(100/(d/2.0))*m_width_ratio;
+			float y = (j-(d/2))*(100/(d/2.0));
+			float grav = sumForcesAt(vec2(x, y)).length()*4.0;
+			glColor3f(grav, grav, -grav);
+			glVertex3f(x, y, -0.1);
+		}
+	}
+	glEnd();*/
+	
+	glPointSize(3.0);
+	
+	weapon.drawParticles();
+	
+	glPointSize(5.0);
+	glDisable(GL_DEPTH_TEST);
+	
+	glLineWidth(2.0);
+	glColor3f(0.0,1.0,.5);
+	glBegin(GL_POINTS);
+	
+	for (int i =0; i< 200; i++){
+		glColor3f(1.0 - i/200.0,1.0 - i/200.0,.5 - i/400.0);
+		glVertex2f(futurePositions[i].x, futurePositions[i].y);
+	}
+
+	glEnd();
+	
+	glBlendFunc(GL_SRC_COLOR, GL_SRC_ALPHA_SATURATE);
+	
+	pengine.draw();
+	
+	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_DEPTH_TEST);
+	
+	glColor3f(1.0, 1.0, 1.0);
+	
+	endzone.draw();
+	
+	dude.draw();	
+	
+	
 	
 	for(int i = 0; i < m_planets.size(); i++)
 	{
 		m_planets[i]->draw();
 	}
 	
-	dude.draw();	
-
-	glBindTexture(GL_TEXTURE_2D, 0);
-	glColor3f(1.0, 1.0, 1.0);
-	glBegin(GL_POINTS);	
-	
-	int d = 40;
-	for(int i = 0; i < d; i++)
-	{
-		for(int j = 0; j < d; j++)
-		{
-			float x = (i-(d/2))*(50/(d/2.0))*m_width_ratio;
-			float y = (j-(d/2))*(50/(d/2.0));
-			float grav = sumForcesAt(vec2(x, y)).length();
-			glColor3f(grav, grav, grav);
-			glVertex3f(x, y, -0.1);
-		}
-	}
-	glEnd();
-	
 	glColor3f(1, 1, 1);
 
 	if(m_menu.isActive())
 	{
 		m_window->Draw(m_menu);
-	}
-	
-	if(victory)
-	{
-		m_window->Draw(*m_splash);
 	}
 }
 
@@ -289,7 +336,7 @@ void IEngine::update()
 {
 	if(m_menu.isActive())
 		return; 
-		
+	
 	float newTime = m_clock->GetElapsedTime();
 	float diff = newTime-time;
 	
@@ -313,7 +360,12 @@ void IEngine::update()
 	
 	if(collidesWithAny(dude.physics_object.pos + dude.physics_object.vel, dude.physics_object.rad))
 	{
+		pengine.createParticles(dude.physics_object.pos,dude.physics_object.vel ,50);
 		dude.physics_object.vel = vec2(0,0);
+		dude.physics_object.pos = vec2(0,0);
+		fuel = 100;
+		sounds.Stop_Music();
+		won = false;
 	}
 	else
 	{
@@ -321,11 +373,33 @@ void IEngine::update()
 		dude.physics_object.addForce(net_force);		
 	}
 	
+	vec2 p = dude.physics_object.pos;
+	vec2 vel = dude.physics_object.vel;
+	float mass = dude.physics_object.mass;
+	
+	for (int i = 0; i< 200; i++){
+		futurePositions[i] = p;
+		vec2 force = sumForcesAt(p);
+		vel = vel + (force * (1/mass));
+		p = p + vel;
+	}
+	
+	if (endzone.checkIfInside(dude.physics_object.pos, dude.physics_object.rad) && !won){ 
+		
+		sounds.Play_Music();
+		won = true;
+	}
+	
+	if (fuel <= 99.9) fuel+= .2;
+	
 	dude.physics_object.update();//*multiplier;
+	
+	pengine.update();
+	
+	weapon.updateParticles();
 	
 	frames++;
 	
-	moving = false;
 }
 
 vec2 IEngine::sumForcesAt(vec2 pos)
@@ -336,6 +410,7 @@ vec2 IEngine::sumForcesAt(vec2 pos)
 		vec2 grav_vector = m_planets[i]->pos - pos;
 		float dist = grav_vector.length() * 1;
 		grav_vector = grav_vector.normalize() * m_planets[i]->mass * (1/(dist*dist));
+		if (dist < m_planets[i]->rad) grav_vector = vec2(0,0);
 		total_force = total_force + grav_vector;
 	}
 	return total_force;		
@@ -348,9 +423,6 @@ bool IEngine::collidesWithAny(vec2 pos, float radius)
 		vec2 diff_vector = m_planets[i]->pos - pos;
 		if(diff_vector.length() < (radius + m_planets[i]->rad))
 		{
-			if(m_planets[i]->is_goal)
-				victory = true;
-				
 			return true;
 		}	
 	}
@@ -367,9 +439,9 @@ void IEngine::resize(int width, int height)
 	glViewport(0, 0, width, height);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gl_width = 100.0 * m_width_ratio;
-	gl_height = 100.0;
-	glOrtho(-50.0 * m_width_ratio,50.0 * m_width_ratio,-50.0,50.0,-50.0,50.0);
+	gl_width = 200.0 * m_width_ratio;
+	gl_height = 200.0;
+	glOrtho(-100.0 * m_width_ratio,100.0 * m_width_ratio,-100.0,100.0,-100.0,100.0);
 	//gluPerspective(45.0,m_width_ratio,1,1000);
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();

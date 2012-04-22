@@ -1,6 +1,6 @@
 #include "Planet.h"
 
-Planet::Planet(vec2 position, float radius, float planetmass, unsigned int texhandle, bool goal){
+Planet::Planet(vec2 position, float radius, float planetmass, unsigned int texhandle){
 	drawable.top = radius;
 	drawable.bottom = -radius;
 	drawable.left = -radius;
@@ -9,7 +9,6 @@ Planet::Planet(vec2 position, float radius, float planetmass, unsigned int texha
 	rad = radius;
 	mass = planetmass;
 	drawable.tex = texhandle;
-	is_goal = goal;
 }
 
 void Planet::draw(){

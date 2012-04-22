@@ -1,6 +1,10 @@
-#ifndef VECTOR2
-#define VECTOR2
+#pragma once
 #include <math.h>
+
+#define PI 3.1415
+#define radians(i) (i/180.0 * PI)
+#define degrees(i) (i/PI * 180.0)
+
 class vec2{
 	public:
 		vec2();
@@ -26,5 +30,3 @@ class vec2{
 
 double angle(vec2 a, vec2 b);
 double dot(vec2 a, vec2 b);
-
-#endif
