@@ -78,6 +78,9 @@ class IEngine
 		float gl_width;
 		float gl_height;
 		
+		float gl_min_width;
+		float gl_min_height;
+		
 		float fuel;
 		
 		bool m_wireframe;

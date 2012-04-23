@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#define MAX_PARTICLES 1028
+#define MAX_PARTICLES 2048
 
 class ParticleEngine{
 

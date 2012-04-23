@@ -1,14 +1,12 @@
 #name: Name
-name: Level 3
+name: GravMedium
 
 #planet: x y radius mass texture
-planet: 0.0 0.0 20.0 100.0 textures/shadedplanet.png
-planet: -50.0 -50.0 10.0 -50.0 textures/shadedplanet.png
-planet: -50.0 50.0 10.0 50.0 textures/shadedplanet.png
-planet: 50.0 50.0 10.0 50.0 textures/shadedplanet.png
+planet: 60.0 50.0 30.0 900.0 textures/shadedplanet.png
+planet: 60.0 -50.0 30.0 900.0 textures/shadedplanet.png
 
 #entity: x y vel_x vel_y rotation radius mass width height texture
-entity: 30 30 0 0 0 2 20 2 4 textures/dude.png
+entity: 0 0 0 0 0 5 20 5 10 textures/dude.png
 
 #goalzone: x y left right up down
-goalzone: -40.0 40.0 -15.0 15.0 -15.0 15.0
+goalzone: -100.0 0.0 -5.0 5.0 -5.0 5.0

@@ -1,0 +1,12 @@
+#name: Name
+name: GravHard
+
+#planet: x y radius mass texture
+planet: 90.0 0.0 10.0 1300.0 textures/planet3.png
+planet: -80.0 0.0 10.0 300.0 textures/planet2.png
+
+#entity: x y vel_x vel_y rotation radius mass width height texture
+entity: 10 0 0 0 0 5 20 5 10 textures/dude.png
+
+#goalzone: x y left right up down
+goalzone: -110.0 0.0 -5.0 5.0 -5.0 5.0

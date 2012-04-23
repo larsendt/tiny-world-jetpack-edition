@@ -229,15 +229,79 @@ int IEngine::begin()
 
 void IEngine::drawScene()
 {
-	
+	vec2 p = dude.physics_object.pos;
+	float w = (gl_min_width * m_width_ratio)/2.0;
+	float h = gl_min_height/2.0;
+	gl_width = w*2;
+	gl_height = h*2;
+	if (fabs(p.x) > w || fabs(p.y) > h){
+		
+		float x = fabs(w - fabs(p.x));
+		float y = fabs(h - fabs(p.y));
+		
+		float a = (x>y?x:y);
+		
+		x = (gl_min_width + a*2) * m_width_ratio;
+		y = gl_min_height + a*2;
+		
+		gl_width = x;
+		gl_height = y;
+		
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glOrtho(-x/2.0, x/2.0, -y/2.0, y/2.0,-100.0,100.0);
+		glMatrixMode(GL_MODELVIEW);
+		
+	}
+	/*if (fabs(p.x) > (gl_min_width * m_width_ratio)/2.0 || fabs(p.y) > gl_min_height/2.0){
+		p = p - vec2(gl_min_width*m_width_ratio/2.0, gl_min_height/2.0);
+		float a = p.length();
+		printf("%f\n", a);
+		float x = (gl_min_width + a) * m_width_ratio;
+		float y = (gl_min_height + a);
+		gl_width = x;
+		gl_height = y;
+		glMatrixMode(GL_PROJECTION);
+		glLoadIdentity();
+		glOrtho(-x, x, -y, y,-100.0,100.0);
+		glMatrixMode(GL_MODELVIEW);
+	}*/
 	
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glLoadIdentity();
 
+	glColor3f(1.0, 1.0, 1.0);
+	
+	dude.draw();	
+		
+	for(int i = 0; i < m_planets.size(); i++)
+	{
+		m_planets[i]->draw();
+	}
+	
+	glColor3f(1, 1, 1);
+	
 	glEnable(GL_TEXTURE_2D);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
+	
+	glLineWidth(1.0);
+	
+	endzone.draw();
 
+	glColor3f(0.0,0.0,1.0);
+	glBegin(GL_TRIANGLES);
+	
+	glVertex2f(100, -100);
+	glVertex2f(100, (fuel/100.0 * 200)-100);
+	glVertex2f(90, (fuel/100.0 * 200)-110);
+	
+	glVertex2f(100, -100);
+	glVertex2f(90, -100);
+	glVertex2f(90, (fuel/100.0 * 200)-110);
+	
+	glEnd();
+	
 	glPointSize(3.0);
 	
 	weapon.drawParticles();
@@ -267,57 +331,12 @@ void IEngine::drawScene()
 	pengine.draw();
 	
 	glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-	glEnable(GL_DEPTH_TEST);
-
-	glColor3f(0.0,0.0,1.0);
-	glBegin(GL_TRIANGLES);
-	
-	glVertex2f(100, -100);
-	glVertex2f(100, (fuel/100.0 * 200)-100);
-	glVertex2f(90, (fuel/100.0 * 200)-110);
-	
-	glVertex2f(100, -100);
-	glVertex2f(90, -100);
-	glVertex2f(90, (fuel/100.0 * 200)-110);
-	
-	glEnd();
-	
-	/*glPointSize(1.0);
-	
-	glBegin(GL_POINTS);	
-	int d = 80;
-	for(int i = 0; i < d; i++)
-	{
-		for(int j = 0; j < d; j++)
-		{
-			float x = (i-(d/2))*(100/(d/2.0))*m_width_ratio;
-			float y = (j-(d/2))*(100/(d/2.0));
-			float grav = sumForcesAt(vec2(x, y)).length()*4.0;
-			glColor3f(grav, grav, -grav);
-			glVertex3f(x, y, -0.1);
-		}
-	}
-	glEnd();*/
-	
-	glColor3f(1.0, 1.0, 1.0);
-	
-	endzone.draw();
-	
-	dude.draw();	
-	
-	
-	
-	for(int i = 0; i < m_planets.size(); i++)
-	{
-		m_planets[i]->draw();
-	}
-	
-	glColor3f(1, 1, 1);
 
 	if(m_menu.isActive())
 	{
 		m_window->Draw(m_menu);
 	}
+
 }
 
 
@@ -349,7 +368,7 @@ void IEngine::update()
 	
 	if(collidesWithAny(dude.physics_object.pos + dude.physics_object.vel, dude.physics_object.rad))
 	{
-		pengine.createParticles(dude.physics_object.pos,dude.physics_object.vel ,50);
+		pengine.createParticles(dude.physics_object.pos,dude.physics_object.vel,50);
 		dude.physics_object.vel = vec2(0,0);
 		dude.physics_object.pos = initialDudePos;
 		fuel = 100;
@@ -436,11 +455,13 @@ void IEngine::resize(int width, int height)
 	m_width_ratio = (height>0) ? (GLfloat)width/height : 1;
 	m_width = width;
 	m_height = height;
+	gl_min_width = 200.0;
+	gl_min_height = 200.0;
+	gl_width = 200.0 * m_width_ratio;
+	gl_height = 200.0;
 	glViewport(0, 0, width, height);
 	glMatrixMode(GL_PROJECTION);
 	glLoadIdentity();
-	gl_width = 200.0 * m_width_ratio;
-	gl_height = 200.0;
 	glOrtho(-100.0 * m_width_ratio,100.0 * m_width_ratio,-100.0,100.0,-100.0,100.0);
 	//gluPerspective(45.0,m_width_ratio,1,1000);
 	glMatrixMode(GL_MODELVIEW);
@@ -450,14 +471,16 @@ void IEngine::resize(int width, int height)
 
 void IEngine::loadLevels()
 {
-	Level* level = new Level("levels/level1.jetworld");
-	m_levels.push_back(level);
-
-	level = new Level("levels/level2.jetworld");
-	m_levels.push_back(level);
-
-	level = new Level("levels/level3.jetworld");
-	m_levels.push_back(level);
+	Level* level;
+	
+	int num_levels = 7;
+	for (int i = 1; i < num_levels+1; i++){
+		char string[50];
+		sprintf(string, "levels/level%i.jetworld", i);
+		printf("%s\n", string);
+		level = new Level(string);
+		m_levels.push_back(level);
+	}
 }
 
 void IEngine::loadLevel(int levelid)

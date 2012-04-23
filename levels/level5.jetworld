@@ -1,11 +1,11 @@
 #name: Name
-name: GravIntro
+name: AntiGravIntro
 
 #planet: x y radius mass texture
-planet: 0.0 0.0 20.0 200.0 textures/shadedplanet.png
+planet: 0.0 45.0 20.0 -200.0 textures/shadedplanet2.png
 
 #entity: x y vel_x vel_y rotation radius mass width height texture
 entity: 80 0 0 0 0 2 20 5 10 textures/dude.png
 
 #goalzone: x y left right up down
-goalzone: -70.0 0.0 -15.0 15.0 -5.0 5.0
+goalzone: -70.0 10.0 -10.0 10.0 -10.0 10.0
