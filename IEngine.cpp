@@ -180,6 +180,7 @@ int IEngine::begin()
 				if(Event.Key.Code == sf::Key::Escape)
 				{
 					m_menu.setActive(!m_menu.isActive());
+					m_displayingSplash = m_menu.isActive();
 				}
 				if(Event.Key.Code == sf::Key::M)
 				{
@@ -198,6 +199,14 @@ int IEngine::begin()
 					sounds.Play_Asplode();
 					sounds.Play_AmbientMusic();
 					won = false;
+				}
+				if(Event.Key.Code == sf::Key::L)
+				{
+					m_menu.setNextLevelButtonEnabled(false);
+					curLevel = (curLevel + 1) % m_levels.size(); 
+					loadLevel(curLevel);
+					m_splash->setText(m_levels[curLevel]->name.c_str());
+					m_displayingSplash = true;
 				}
 			}
 			else if(Event.Type == sf::Event::Resized)
@@ -478,8 +487,8 @@ void IEngine::resize(int width, int height)
 	m_width_ratio = (height>0) ? (GLfloat)width/height : 1;
 	m_width = width;
 	m_height = height;
-	gl_min_width = 200.0;
-	gl_min_height = 200.0;
+	gl_min_width = 150.0;
+	gl_min_height = 150.0;
 	gl_width = 200.0 * m_width_ratio;
 	gl_height = 200.0;
 	glViewport(0, 0, width, height);
@@ -531,5 +540,26 @@ void IEngine::loadLevel(int levelid)
 	sounds.Kill_WinMusic();
 	sounds.Play_AmbientMusic();
 	won = false;
+	
+	vec2 p = dude.physics_object.pos;
+	float w = (gl_min_width * m_width_ratio)/2.0;
+	float h = gl_min_height/2.0;
+	gl_width = w*2;
+	gl_height = h*2;
+	float x = fabs(w - fabs(p.x));
+	float y = fabs(h - fabs(p.y));
+
+	float a = (x>y?x:y);
+
+	x = (gl_min_width + a*2) * m_width_ratio;
+	y = gl_min_height + a*2;
+
+	gl_width = x;
+	gl_height = y;
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	glOrtho(-x/2.0, x/2.0, -y/2.0, y/2.0,-100.0,100.0);
+	glMatrixMode(GL_MODELVIEW);
 
 }
