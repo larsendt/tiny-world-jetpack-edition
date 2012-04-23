@@ -18,6 +18,9 @@ IEngine::IEngine(int argc, char** argv)
 	initGL(argc, argv);
 	m_width = 800;
 	m_height = 600;
+	
+	m_splash = new SplashScreen(m_width, m_height, "DERP");
+	
 	resize(m_width, m_height);
 	m_time = 0.0;
 	frames = 0;
@@ -45,6 +48,9 @@ IEngine::IEngine(int argc, char** argv)
 	curLevel = 0;
 	loadLevels();	
 	loadLevel(curLevel);
+	
+	m_splash->setText(m_levels[curLevel]->name.c_str());
+	m_displayingSplash = true;
 	
 	contact = 0;
 	won = false;
@@ -213,6 +219,13 @@ int IEngine::begin()
 				m_menu.setNextLevelButtonEnabled(false);
 				curLevel = (curLevel + 1) % m_levels.size(); 
 				loadLevel(curLevel);
+				m_splash->setText(m_levels[curLevel]->name.c_str());
+				m_displayingSplash = true;
+			}
+			else if(action == Resume)
+			{
+				m_displayingSplash = false;
+				m_menu.setActive(false);
 			}
 		}
 		
@@ -338,6 +351,11 @@ void IEngine::drawScene()
 	if(m_menu.isActive())
 	{
 		m_window->Draw(m_menu);
+	}
+	
+	if(m_displayingSplash)
+	{
+		m_window->Draw(*m_splash);
 	}
 
 }
@@ -472,6 +490,8 @@ void IEngine::resize(int width, int height)
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
 	p.resize(width, height);
+	
+	m_splash->resize(width, height);
 }
 
 void IEngine::loadLevels()

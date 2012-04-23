@@ -15,7 +15,7 @@ Menu::Menu() : sf::Drawable()
 	m_yesButton = new Button(105, 0, 100, 30, "YES", Yes, true);
 	m_noButton = new Button(210, 0, 100, 30, "NO", No, true);
 
-	m_resumeButton = new Button(0, 105, 100, 30, "RESUME GAME", Nothing, true);
+	m_resumeButton = new Button(0, 105, 100, 30, "RESUME GAME", Resume, true);
 	
 	m_confirmingAction = false;
 	m_active = false;
@@ -154,7 +154,8 @@ void Menu::mouseClick(int x, int y)
 	
 		if(x > m_resumeButton->left() && x < m_resumeButton->right() && y > m_resumeButton->top() && y < m_resumeButton->bottom())
 		{
-			m_active = false;
+			m_lastAction = m_resumeButton->action();
+			return;
 		}
 	}
 }

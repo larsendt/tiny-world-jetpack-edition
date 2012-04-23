@@ -12,6 +12,7 @@ enum MenuAction {
 	No,
 	Retry,
 	Next,
+	Resume,
 	Quit
 };
 

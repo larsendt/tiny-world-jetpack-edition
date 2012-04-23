@@ -21,6 +21,7 @@
 #include "GoalZone.h"
 #include "Weapon.h"
 #include "Level.h"
+#include "SplashScreen.h"
 #include <vector>
 
 #define w_gl_to_pix(x) (int)(x * (m_width/gl_width)) + (m_width/2.0)
@@ -90,6 +91,9 @@ class IEngine
 		PostProcess p;
 		Shader * sh;
 
+		SplashScreen* m_splash;	
+		bool m_displayingSplash;
+		
 		vec2 initialDudePos;
 		
 		std::vector<Planet*> m_planets;
