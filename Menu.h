@@ -10,6 +10,8 @@ enum MenuAction {
 	Nothing,
 	Yes,
 	No,
+	Retry,
+	Next,
 	Quit
 };
 
@@ -22,6 +24,9 @@ class Menu : public sf::Drawable
 		void mouseClick(int x, int y);
 		void mouseHover(int x, int y);
 		void keyPress(sf::Key::Code);
+		void setNextLevelButtonEnabled(bool enabled);
+		
+		void resize(int width, int height);
 		
 		void setActive(bool active);
 		bool isActive() { return m_active; }
@@ -40,6 +45,7 @@ class Menu : public sf::Drawable
 		Button* m_resumeButton;
 		Button* m_yesButton;
 		Button* m_noButton;
+		Button* m_nextButton;
 		std::vector<Button*> m_buttons;
 };
 
@@ -47,7 +53,7 @@ class Menu : public sf::Drawable
 class Button : public sf::Shape
 {
 	public:
-		Button(int x, int y, int width, int height, const char* text, MenuAction action, bool confirmation = false);
+		Button(int x, int y, int width, int height, const char* text, MenuAction action, bool enabled, bool confirmation = false);
 		
 		void setText(const char* text);
 		const char* text() { return m_text; }
@@ -56,6 +62,8 @@ class Button : public sf::Shape
 		bool wantsConfirmation() { return m_confirm; }
 		
 		void setHover(bool hover);
+		void setEnabled(bool enabled);
+		bool enabled() { return m_enabled; }
 		
 		int left() { return m_x; }
 		int right() { return m_x+m_width; }
@@ -78,6 +86,7 @@ class Button : public sf::Shape
 		const char* m_text;
 		MenuAction m_action;
 		bool m_confirm;
+		bool m_enabled;
 };
 
 	

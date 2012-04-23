@@ -193,11 +193,6 @@ int IEngine::begin()
 					sounds.Play_AmbientMusic();
 					won = false;
 				}
-				if(Event.Key.Code == sf::Key::L)
-				{
-					curLevel = (curLevel + 1) % m_levels.size();
-					loadLevel(curLevel);
-				}
 			}
 			else if(Event.Type == sf::Event::Resized)
 			{
@@ -211,6 +206,14 @@ int IEngine::begin()
 			MenuAction action = m_menu.getAction();
 			if(action == Quit)
 				m_window->Close();
+			else if(action == Retry)
+				loadLevel(curLevel);
+			else if(action == Next)
+			{
+				m_menu.setNextLevelButtonEnabled(false);
+				curLevel = (curLevel + 1) % m_levels.size(); 
+				loadLevel(curLevel);
+			}
 		}
 		
 		checkKeys();
@@ -407,6 +410,8 @@ void IEngine::update()
 		sounds.Kill_AmbientMusic();
 		sounds.Play_WinMusic();
 		won = true;
+		m_menu.setNextLevelButtonEnabled(true);
+		m_menu.setActive(true);
 	}
 	
 	if (fuel <= 99.9) fuel+= .2;

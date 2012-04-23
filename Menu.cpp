@@ -3,22 +3,32 @@
 
 Menu::Menu() : sf::Drawable()
 {
-	Button* button = new Button(0, 0, 100, 30, "DERP BUTTON 1", Nothing);
+	Button* button = new Button(0, 0, 100, 30, "RESTART LEVEL", Retry, true, true);
 	m_buttons.push_back(button);
 	
-	button = new Button(0, 35, 100, 30, "DERP BUTTON 2", Nothing, true);
+	m_nextButton = new Button(0, 35, 100, 30, "NEXT LEVEL", Next, false);
+	m_buttons.push_back(m_nextButton);
+	
+	button = new Button(0, 70, 100, 30, "EXIT GAME", Quit, true, true);
 	m_buttons.push_back(button);
 	
-	button = new Button(0, 70, 100, 30, "EXIT GAME", Quit, true);
-	m_buttons.push_back(button);
-	
-	m_yesButton = new Button(105, 0, 100, 30, "YES", Yes);
-	m_noButton = new Button(210, 0, 100, 30, "NO", No);
+	m_yesButton = new Button(105, 0, 100, 30, "YES", Yes, true);
+	m_noButton = new Button(210, 0, 100, 30, "NO", No, true);
 
-	m_resumeButton = new Button(0, 105, 100, 30, "RESUME GAME", Nothing);
+	m_resumeButton = new Button(0, 105, 100, 30, "RESUME GAME", Nothing, true);
 	
 	m_confirmingAction = false;
 	m_active = false;
+}
+
+void Menu::resize(int width, int height)
+{
+
+}
+
+void Menu::setNextLevelButtonEnabled(bool enabled)
+{
+	m_nextButton->setEnabled(enabled);
 }
 
 void Menu::setActive(bool active)
@@ -124,7 +134,7 @@ void Menu::mouseClick(int x, int y)
 	{
 		for(int i = 0; i < m_buttons.size(); i++)
 		{
-			if(x > m_buttons[i]->left() && x < m_buttons[i]->right() && y > m_buttons[i]->top() && y < m_buttons[i]->bottom())
+			if(m_buttons[i]->enabled() && x > m_buttons[i]->left() && x < m_buttons[i]->right() && y > m_buttons[i]->top() && y < m_buttons[i]->bottom())
 			{
 				if(m_buttons[i]->wantsConfirmation())
 				{
@@ -169,7 +179,7 @@ void Menu::Render(sf::RenderTarget& target) const
 ///          Button
 ///////////////////////////////////
 
-Button::Button(int x, int y, int width, int height, const char* text, MenuAction action, bool confirmation) : sf::Shape()
+Button::Button(int x, int y, int width, int height, const char* text, MenuAction action, bool enabled, bool confirmation) : sf::Shape()
 {
 	m_x = x;
 	m_y = y;
@@ -179,7 +189,12 @@ Button::Button(int x, int y, int width, int height, const char* text, MenuAction
 	m_text = text;
 	m_confirm = confirmation;
 	
-	SetColor(sf::Color(200, 200, 200));
+	m_enabled = enabled;
+	
+	if(m_enabled)
+		SetColor(sf::Color(200, 200, 200));
+	else
+		SetColor(sf::Color(100, 100, 100));
 	
 	m_str = sf::String(text, sf::Font::GetDefaultFont(), 12.0);
 	m_str.SetColor(sf::Color(50, 50, 50));
@@ -195,6 +210,16 @@ Button::Button(int x, int y, int width, int height, const char* text, MenuAction
 	AddPoint(x, y+height);
 }
 
+void Button::setEnabled(bool enabled)
+{
+	m_enabled = enabled;
+	
+	if(m_enabled)
+		SetColor(sf::Color(200, 200, 200));
+	else
+		SetColor(sf::Color(100, 100, 100));
+}
+
 void Button::setText(const char* text)
 {
 	m_str.SetText(text);
@@ -203,13 +228,20 @@ void Button::setText(const char* text)
 
 void Button::setHover(bool hover)
 {
-	if(hover)
+	if(m_enabled)
 	{
-		SetColor(sf::Color(255, 255, 255));
+		if(hover)
+		{
+			SetColor(sf::Color(255, 255, 255));
+		}
+		else
+		{
+			SetColor(sf::Color(200, 200, 200));
+		}
 	}
 	else
 	{
-		SetColor(sf::Color(200, 200, 200));
+		SetColor(sf::Color(100, 100, 100));
 	}
 }
 
