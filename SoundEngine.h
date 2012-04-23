@@ -12,6 +12,9 @@ public:
 	void Play_Jetpack(bool);
 	bool jetpack_playing;
 	
+	void Load_Asplode();
+	void Play_Asplode();
+	
 	void Load_WinMusic();
 	void Play_WinMusic();
 	void Pause_WinMusic();
@@ -26,6 +29,8 @@ public:
 private:
 	sf::Sound JetpackSound;
 	sf::SoundBuffer JetpackBuffer;
+	sf::Sound AsplodeSound;
+	sf::SoundBuffer AsplodeBuffer;
 	sf::Music Music1;
 	sf::Music Music2;
 	sf::Music Music3;

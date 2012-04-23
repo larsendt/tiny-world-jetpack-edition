@@ -45,6 +45,27 @@ void SoundEngine::Play_Jetpack(bool is_playing)
 		{}
 }
 
+
+void SoundEngine::Load_Asplode()
+{
+	if (!AsplodeBuffer.LoadFromFile("sounds/asplode.wav"))
+		{
+		
+		}
+	AsplodeSound.SetBuffer(AsplodeBuffer);
+	AsplodeSound.SetLoop(false);
+	AsplodeSound.SetVolume(40);
+}
+
+void SoundEngine::Play_Asplode()
+{
+	
+
+		AsplodeSound.Play();
+
+}
+
+
 void SoundEngine::Load_WinMusic()
 {
 	if (!Music1.OpenFromFile("sounds/win.ogg"))

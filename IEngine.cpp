@@ -188,7 +188,8 @@ int IEngine::begin()
 					dude.physics_object.vel = vec2(0,0);
 					fuel = 100;
 					sounds.Kill_WinMusic();
-				sounds.Play_AmbientMusic();
+					sounds.Play_Asplode();
+					sounds.Play_AmbientMusic();
 					won = false;
 				}
 				if(Event.Key.Code == sf::Key::L)
@@ -352,6 +353,7 @@ void IEngine::update()
 		dude.physics_object.pos = initialDudePos;
 		fuel = 100;
 		sounds.Kill_WinMusic();
+		sounds.Play_Asplode();
 		sounds.Play_AmbientMusic();
 		won = false;
 	}
@@ -468,6 +470,7 @@ void IEngine::loadLevel(int levelid)
 	sounds.Load_WinMusic();
 	sounds.Load_AmbientMusic();
 	sounds.Load_Jetpack();
+	sounds.Load_Asplode();
 	
 	dude = level->dude;
 	weapon.init(&dude.physics_object);
