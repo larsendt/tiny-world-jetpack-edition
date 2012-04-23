@@ -15,6 +15,9 @@ public:
 	void Load_Asplode();
 	void Play_Asplode();
 	
+	void Load_Pew();
+	void Play_Pew();
+	
 	void Load_WinMusic();
 	void Play_WinMusic();
 	void Pause_WinMusic();
@@ -31,6 +34,8 @@ private:
 	sf::SoundBuffer JetpackBuffer;
 	sf::Sound AsplodeSound;
 	sf::SoundBuffer AsplodeBuffer;
+	sf::Sound PewSound;
+	sf::SoundBuffer PewBuffer;
 	sf::Music Music1;
 	sf::Music Music2;
 	sf::Music Music3;

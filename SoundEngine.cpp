@@ -54,7 +54,7 @@ void SoundEngine::Load_Asplode()
 		}
 	AsplodeSound.SetBuffer(AsplodeBuffer);
 	AsplodeSound.SetLoop(false);
-	AsplodeSound.SetVolume(40);
+	AsplodeSound.SetVolume(80);
 }
 
 void SoundEngine::Play_Asplode()
@@ -63,6 +63,27 @@ void SoundEngine::Play_Asplode()
 
 		AsplodeSound.Play();
 
+}
+
+
+
+void SoundEngine::Load_Pew()
+{
+	if (!PewBuffer.LoadFromFile("sounds/pew.wav"))
+		{
+		
+		}
+	PewSound.SetBuffer(PewBuffer);
+	PewSound.SetLoop(false);
+	PewSound.SetVolume(40);
+}
+
+void SoundEngine::Play_Pew()
+{
+	
+	
+	PewSound.Play();
+	
 }
 
 
