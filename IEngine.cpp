@@ -344,7 +344,7 @@ void IEngine::update()
 		dude.physics_object.vel = vec2(0,0);
 		dude.physics_object.pos = initialDudePos;
 		fuel = 100;
-		sounds.Stop_Music();
+		sounds.Kill_Music();
 		won = false;
 	}
 	else
@@ -462,7 +462,7 @@ void IEngine::loadLevel(int levelid)
 	initialDudePos = dude.physics_object.pos;
 	dude.physics_object.vel = vec2(0,0);
 	fuel = 100;
-	sounds.Stop_Music();
+	sounds.Kill_Music();
 	won = false;
 
 }

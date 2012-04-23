@@ -12,7 +12,8 @@ public:
 	void Play_Jetpack(bool);
 	void Load_Music();
 	void Play_Music();
-	void Stop_Music();
+	void Pause_Music();
+	void Kill_Music();
 	bool jetpack_playing;
 	
 private:

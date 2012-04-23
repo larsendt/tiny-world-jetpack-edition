@@ -43,7 +43,7 @@ void SoundEngine::Play_Jetpack(bool is_playing)
 
 void SoundEngine::Load_Music()
 {
-	if (!Music1.OpenFromFile("sounds/music.ogg"))
+	if (!Music1.OpenFromFile("sounds/win.ogg"))
 		{
 			// Error...
 		}
@@ -53,9 +53,13 @@ void SoundEngine::Play_Music()
 {
 	Music1.Play();
 }
-void SoundEngine::Stop_Music()
+void SoundEngine::Pause_Music()
 {
 	Music1.Pause();
+}
+void SoundEngine::Kill_Music()
+{
+	Music1.Stop();
 }
 
 
