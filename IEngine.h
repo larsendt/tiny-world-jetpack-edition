@@ -29,6 +29,12 @@
 #define w_pix_to_gl(x) (x-m_width/2.0) * (gl_width/m_width)
 #define h_pix_to_gl(y) (-y+m_height/2.0) * (gl_height/m_height)
 
+struct Position{
+	vec2 pos;
+	float speed;
+	bool active;
+};
+
 class IEngine
 {
 	public:
@@ -55,7 +61,7 @@ class IEngine
 	
 		Weapon weapon;
 	
-		vec2 futurePositions[100];
+		Position futurePositions[100];
 	
 		double m_time;
 		sf::RenderWindow* m_window;

@@ -187,7 +187,7 @@ int IEngine::begin()
 					dude.physics_object.pos = initialDudePos;
 					dude.physics_object.vel = vec2(0,0);
 					fuel = 100;
-					sounds.Stop_Music();
+					sounds.Kill_Music();
 					won = false;
 				}
 				if(Event.Key.Code == sf::Key::L)
@@ -240,6 +240,9 @@ void IEngine::drawScene()
 	weapon.drawParticles();
 	
 	glPointSize(5.0);
+	
+	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
+	
 	glDisable(GL_DEPTH_TEST);
 	
 	glLineWidth(5.0);
@@ -247,13 +250,16 @@ void IEngine::drawScene()
 	glBegin(GL_LINE_STRIP);
 	
 	for (int i =0; i< 100; i++){
-		glColor3f(.5 - i/200.0,1.0 - i/100.0,.5 - i/200.0);
-		glVertex2f(futurePositions[i].x, futurePositions[i].y);
+		Position p = futurePositions[i];
+		float speed = p.speed;
+		if (p.active){
+			glColor3f(0.0,speed/2.0,speed);
+		}
+		else glColor3f(1.0,0,0);
+		glVertex2f(p.pos.x, p.pos.y);
 	}
 
 	glEnd();
-	
-	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_COLOR);
 	
 	pengine.draw();
 	
@@ -356,7 +362,8 @@ void IEngine::update()
 	vec2 p = dude.physics_object.pos;
 	vec2 vel = dude.physics_object.vel;
 	float mass = dude.physics_object.mass;
-	
+	float radius = dude.physics_object.rad;
+	bool active = 1;
 	vec2 force;
 	
 	for (int i = 0; i< 100; i++){
@@ -366,9 +373,11 @@ void IEngine::update()
 			vel = vel + (force * (1/mass));
 			p = p + vel;
 		}
-		futurePositions[i] = p;
+		active = active && !collidesWithAny(p, radius);
+		futurePositions[i].active = active;
+		futurePositions[i].speed = vel.length();
+		futurePositions[i].pos = p;
 	}
-	
 	if (endzone.checkIfInside(dude.physics_object.pos, dude.physics_object.rad) && !won){ 
 		
 		sounds.Play_Music();
