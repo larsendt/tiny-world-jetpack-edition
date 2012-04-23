@@ -187,7 +187,7 @@ int IEngine::begin()
 					dude.physics_object.pos = initialDudePos;
 					dude.physics_object.vel = vec2(0,0);
 					fuel = 100;
-					sounds.Kill_Music();
+					sounds.Kill_WinMusic();
 					won = false;
 				}
 				if(Event.Key.Code == sf::Key::L)
@@ -350,7 +350,7 @@ void IEngine::update()
 		dude.physics_object.vel = vec2(0,0);
 		dude.physics_object.pos = initialDudePos;
 		fuel = 100;
-		sounds.Kill_Music();
+		sounds.Kill_WinMusic();
 		won = false;
 	}
 	else
@@ -380,7 +380,8 @@ void IEngine::update()
 	}
 	if (endzone.checkIfInside(dude.physics_object.pos, dude.physics_object.rad) && !won){ 
 		
-		sounds.Play_Music();
+		sounds.Kill_AmbientMusic();
+		sounds.Play_WinMusic();
 		won = true;
 	}
 	
@@ -462,7 +463,8 @@ void IEngine::loadLevel(int levelid)
 	m_planets = level->planets;
 	endzone = level->goalZone;
 
-	sounds.Load_Music();
+	sounds.Load_WinMusic();
+	sounds.Load_AmbientMusic();
 	sounds.Load_Jetpack();
 	
 	dude = level->dude;
@@ -471,7 +473,8 @@ void IEngine::loadLevel(int levelid)
 	initialDudePos = dude.physics_object.pos;
 	dude.physics_object.vel = vec2(0,0);
 	fuel = 100;
-	sounds.Kill_Music();
+	sounds.Kill_WinMusic();
+	sounds.Play_AmbientMusic();
 	won = false;
 
 }

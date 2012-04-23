@@ -1,3 +1,7 @@
+
+
+
+
 #include "SoundEngine.h"
 #include <iostream>
 
@@ -5,7 +9,7 @@ void SoundEngine::Load_Jetpack()
 {
 	if (!JetpackBuffer.LoadFromFile("sounds/jetpack_noise.wav"))
 		{
-			
+		
 		}
 	JetpackSound.SetBuffer(JetpackBuffer);
 	JetpackSound.SetLoop(true);
@@ -16,10 +20,10 @@ void SoundEngine::Load_Jetpack()
 void SoundEngine::Play_Jetpack(bool is_playing)
 {
 	
-/*	if (is_playing)
-		{
-		JetpackSound.Play();
-		}*/
+	/*	if (is_playing)
+	 {
+	 JetpackSound.Play();
+	 }*/
 	
 	JetStatus = JetpackSound.GetStatus();
 	if (is_playing && (!jetpack_playing))
@@ -36,12 +40,12 @@ void SoundEngine::Play_Jetpack(bool is_playing)
 		JetpackSound.Stop();
 		jetpack_playing = false;
 		}
-		
+	
 	else if (!is_playing && !jetpack_playing)
 		{}
 }
 
-void SoundEngine::Load_Music()
+void SoundEngine::Load_WinMusic()
 {
 	if (!Music1.OpenFromFile("sounds/win.ogg"))
 		{
@@ -49,17 +53,39 @@ void SoundEngine::Load_Music()
 		}
 	Music1.SetLoop(true);
 }
-void SoundEngine::Play_Music()
+void SoundEngine::Play_WinMusic()
 {
 	Music1.Play();
 }
-void SoundEngine::Pause_Music()
+void SoundEngine::Pause_WinMusic()
 {
 	Music1.Pause();
 }
-void SoundEngine::Kill_Music()
+void SoundEngine::Kill_WinMusic()
 {
 	Music1.Stop();
+}
+
+
+void SoundEngine::Load_AmbientMusic()
+{
+	if (!Music2.OpenFromFile("sounds/ambient.ogg"))
+		{
+			// Error...
+		}
+	Music2.SetLoop(true);
+}
+void SoundEngine::Play_AmbientMusic()
+{
+	Music2.Play();
+}
+void SoundEngine::Pause_AmbientMusic()
+{
+	Music2.Pause();
+}
+void SoundEngine::Kill_AmbientMusic()
+{
+	Music2.Stop();
 }
 
 
@@ -68,3 +94,5 @@ SoundEngine::SoundEngine()
 
 SoundEngine::~SoundEngine()
 {}
+
+
