@@ -3,10 +3,10 @@ name: Level 1
 
 #planet: x y radius mass texture
 planet: 0.0 0.0 20.0 100.0 textures/shadedplanet.png
-planet: -50.0 -50.0 10.0 50.0 textures/shadedplanet2.png
+planet: -50.0 -50.0 10.0 50.0 textures/shadedplanet.png
 
 #entity: x y vel_x vel_y rotation radius mass width height texture
 entity: 40 40 0 0 0 2 20 2 4 textures/dude.png
 
 #goalzone: x y left right up down
-goalzone: -40.0 40.0 -15.0 15.0 -15.0 15.0
+goalzone: -70.0 0.0 -15.0 15.0 -15.0 15.0
