@@ -188,6 +188,7 @@ int IEngine::begin()
 					dude.physics_object.vel = vec2(0,0);
 					fuel = 100;
 					sounds.Kill_WinMusic();
+				sounds.Play_AmbientMusic();
 					won = false;
 				}
 				if(Event.Key.Code == sf::Key::L)
@@ -351,6 +352,7 @@ void IEngine::update()
 		dude.physics_object.pos = initialDudePos;
 		fuel = 100;
 		sounds.Kill_WinMusic();
+		sounds.Play_AmbientMusic();
 		won = false;
 	}
 	else
