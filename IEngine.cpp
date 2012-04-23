@@ -125,6 +125,7 @@ void IEngine::checkKeys(){
 	
 	if (lbutton){
 		weapon.shoot();
+		sounds.Play_Pew();
 	}
 	
 	if (space && (fuel>=1.0)){	
@@ -471,6 +472,7 @@ void IEngine::loadLevel(int levelid)
 	sounds.Load_AmbientMusic();
 	sounds.Load_Jetpack();
 	sounds.Load_Asplode();
+	sounds.Load_Pew();
 	
 	dude = level->dude;
 	weapon.init(&dude.physics_object);
